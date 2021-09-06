@@ -88,7 +88,7 @@ ThisBuild / githubWorkflowPublishPreamble := Seq(
     env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}")),
 
   WorkflowStep.Run(
-    List("echo \"$PGP_PASSPHRASE\\n\\n\\n\" | gpg --command-fd 0 --pinentry-mode loopback --change-passphrase 5EBC14B0F6C55083"),
+    List("(echo \"$PGP_PASSPHRASE\"; echo; echo) | gpg --command-fd 0 --pinentry-mode loopback --change-passphrase 5EBC14B0F6C55083"),
     name = Some("Strip passphrase from signing key"),
     env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}")))
 
