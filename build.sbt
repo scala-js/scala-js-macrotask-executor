@@ -79,6 +79,9 @@ ThisBuild / spiewakMainBranches := Seq("main")
 ThisBuild / githubWorkflowArtifactUpload := false
 
 // we can remove this once we have a non-password-protected key in the secrets
+ThisBuild / githubWorkflowPublishPreamble :=
+  WorkflowStep.ComputeVar("GPG_TTY", "tty") +: (ThisBuild / githubWorkflowPublishPreamble).value
+
 ThisBuild / githubWorkflowPublishPreamble +=
   WorkflowStep.Run(
     List("echo \"$PGP_PASSPHRASE\" | gpg --batch --yes --passphrase-fd 0 build.sbt &> /dev/null"),
