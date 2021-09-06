@@ -2,7 +2,7 @@
 
 An implementation of `ExecutionContext` in terms of JavaScript's [`setImmediate`](https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate). Unfortunately for everyone involved, `setImmediate` is only available on Edge and Node.js, meaning that this functionality must be polyfilled on all other environments. The details of this polyfill can be found in the readme of the excellent [YuzuJS/setImmediate](https://github.com/YuzuJS/setImmediate) project, though the implementation here is in terms of Scala.js primitives rather than raw JavaScript.
 
-**Unless you have some very, very specific and unusual requirements, this is the optimal `ExecutionContext` implementation for use in any ScalaJS project.** If you're using `ExecutionContext` and *not* using this project, you likely have some serious bugs and/or performance issues waiting to be discovered.
+**Unless you have some very, very specific and unusual requirements, this is the optimal `ExecutionContext` implementation for use in any Scala.js project.** If you're using `ExecutionContext` and *not* using this project, you likely have some serious bugs and/or performance issues waiting to be discovered.
 
 ## Usage
 
@@ -10,7 +10,7 @@ An implementation of `ExecutionContext` in terms of JavaScript's [`setImmediate`
 libraryDependencies += "org.scala-js" %% "scala-js-macrotask-executor" % "<version>"
 ```
 
-Published for Scala 2.12.14, 2.13.6, 3.0.1. Functionality is fully supported on all platforms supported by ScalaJS (including web workers). In the event that a given platform does *not* have the necessary functionality to implement `setImmediate`-style yielding (usually `postMessage` is what is required), the implementation will transparently fall back to using `setTimeout`, which will drastically inhibit performance but remain otherwise functional.
+Published for Scala 2.12.14, 2.13.6, 3.0.1. Functionality is fully supported on all platforms supported by Scala.js (including web workers). In the event that a given platform does *not* have the necessary functionality to implement `setImmediate`-style yielding (usually `postMessage` is what is required), the implementation will transparently fall back to using `setTimeout`, which will drastically inhibit performance but remain otherwise functional.
 
 ```scala
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
@@ -42,13 +42,13 @@ js.timers.setTimeout(100.millis) {
 loop()
 ```
 
-The `loop()` future will run forever when using the default ScalaJS executor, which is written in terms of JavaScript's `Promise`. The *reason* this will run forever stems from the fact that JavaScript includes two separate work queues: the microtask and the macrotask queue. The microtask queue is used exclusively by `Promise`, while the macrotask queue is used by everything else, including UI rendering, `setTimeout`, and I/O such as XHR or NodeJS things. The semantics are such that, whenever the microtask queue has work, it takes full precedence over the macrotask queue until the microtask queue is completely exhausted.
+The `loop()` future will run forever when using the default Scala.js executor, which is written in terms of JavaScript's `Promise`. The *reason* this will run forever stems from the fact that JavaScript includes two separate work queues: the microtask and the macrotask queue. The microtask queue is used exclusively by `Promise`, while the macrotask queue is used by everything else, including UI rendering, `setTimeout`, and I/O such as XHR or Node.js things. The semantics are such that, whenever the microtask queue has work, it takes full precedence over the macrotask queue until the microtask queue is completely exhausted.
 
 This explains why the above snippet will run forever on a `Promise`-based executor: the microtask queue is *never* empty because we're constantly adding new tasks! Thus, `setTimeout` is never able to run because the macrotask queue never receives control.
 
-This is fixable by using a `setTimeout`-based executor, such as the `QueueExecutionContext.timeouts()` implementation in ScalaJS. Unfortunately, this runs into an even more serious issue: `setTimeout` is *clamped* in all JavaScript environments. In particular, it is clamped to a minimum of 4ms and, in practice, usually somewhere between 4ms and 10ms. This clamping kicks in whenever more than 5 consecutive timeouts have been scheduled. You can read more details [in the MDM documentation](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting).
+This is fixable by using a `setTimeout`-based executor, such as the `QueueExecutionContext.timeouts()` implementation in Scala.js. Unfortunately, this runs into an even more serious issue: `setTimeout` is *clamped* in all JavaScript environments. In particular, it is clamped to a minimum of 4ms and, in practice, usually somewhere between 4ms and 10ms. This clamping kicks in whenever more than 5 consecutive timeouts have been scheduled. You can read more details [in the MDM documentation](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting).
 
-The only solution to this mess is to yield to the macrotask queue *without* using `setTimeout`. This is precisely what `setImmediate` does on Edge and NodeJS. In particular, `setImmediate(...)` is *semantically* equivalent to `setTimeout(0, ...)`, except without the associated clamping. Unfortunately, due to the fact that only a pair of platforms support this function, alternative implementations are required across other major browsers. In particular, *most* environments take advantage of `postMessage` in some way.
+The only solution to this mess is to yield to the macrotask queue *without* using `setTimeout`. This is precisely what `setImmediate` does on Edge and Node.js. In particular, `setImmediate(...)` is *semantically* equivalent to `setTimeout(0, ...)`, except without the associated clamping. Unfortunately, due to the fact that only a pair of platforms support this function, alternative implementations are required across other major browsers. In particular, *most* environments take advantage of `postMessage` in some way.
 
 ### Performance Notes
 
