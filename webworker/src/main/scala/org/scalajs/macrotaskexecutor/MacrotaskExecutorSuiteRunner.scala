@@ -42,7 +42,7 @@ object MacrotaskExecutorSuiteRunner {
       def fireTestSuiteFinished(description: Description): Unit = ()
       def fireTestIgnored(description: Description): Unit = ()
       def fireTestFinished(description: Description): Unit = ()
-      def fireTestFailure(failure: Failure): Unit = ()
+      def fireTestFailure(failure: Failure): Unit = postMessage(false)
       def fireTestAssumptionFailed(failure: Failure): Unit = ()
     }).onComplete {
       case util.Success(_) => postMessage(true)
