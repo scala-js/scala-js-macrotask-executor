@@ -40,6 +40,8 @@ ThisBuild / scmInfo := Some(
     url("https://github.com/scala-js/scala-js-macrotask-executor"),
     "git@github.com:scala-js/scala-js-macrotask-executor.git"))
 
+// build and matrix configuration
+
 ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.6", "3.0.1")
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
@@ -65,6 +67,21 @@ addCommandAlias("ciNode", "; set useJSEnv := JSEnv.NodeJS; core/test; core/doc")
 addCommandAlias("ciFirefox", "; set useJSEnv := JSEnv.Firefox; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciChrome", "; set useJSEnv := JSEnv.Chrome; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciJSDOMNodeJS", "; set useJSEnv := JSEnv.JSDOMNodeJS; core/test; set useJSEnv := JSEnv.NodeJS")
+
+// release configuration
+
+enablePlugins(SonatypeCiReleasePlugin)
+
+ThisBuild / spiewakMainBranches := Seq("main")
+
+// we can remove this once we have a non-password-protected key in the secrets
+ThisBuild / githubWorkflowPublishPreamble +=
+  WorkflowStep.Run(
+    List("echo \"$PGP_PASSPHRASE\" | gpg --batch --yes --passphrase-fd 0 build.sbt &> /dev/null"),
+    name = Some("Hack pinentry to use PGP_PASSPHRASE"),
+    env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}"))
+
+// environments
 
 lazy val useJSEnv =
   settingKey[JSEnv]("Use Node.js or a headless browser for running Scala.js tests")
@@ -104,6 +121,8 @@ ThisBuild / Test / jsEnv := {
       new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
   }
 }
+
+// project structure
 
 lazy val root = project
   .aggregate(core, webworker)
