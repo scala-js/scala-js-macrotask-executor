@@ -150,4 +150,8 @@ object MacrotaskExecutor extends ExecutionContext {
       }
     }
   }
+
+  object Implicits {
+    implicit def global: ExecutionContext = MacrotaskExecutor
+  }
 }
