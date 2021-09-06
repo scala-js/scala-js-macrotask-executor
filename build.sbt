@@ -73,6 +73,7 @@ addCommandAlias("ciJSDOMNodeJS", "; set useJSEnv := JSEnv.JSDOMNodeJS; core/test
 enablePlugins(SonatypeCiReleasePlugin)
 
 ThisBuild / spiewakMainBranches := Seq("main")
+ThisBuild / githubWorkflowArtifactUpload := false
 
 // we can remove this once we have a non-password-protected key in the secrets
 ThisBuild / githubWorkflowPublishPreamble +=
