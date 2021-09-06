@@ -1,6 +1,6 @@
 # scala-js-macrotask-executor
 
-An implementation of `ExecutionContext` in terms of JavaScript's [`setImmediate`](https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate). Unfortunately for everyone involved, `setImmediate` is only available on Edge and NodeJS, meaning that this functionality must be polyfilled on all other environments. The details of this polyfill can be found in the readme of the excellent [YuzuJS/setImmediate](https://github.com/YuzuJS/setImmediate) project, though the implementation here is in terms of ScalaJS primitives rather than raw JavaScript.
+An implementation of `ExecutionContext` in terms of JavaScript's [`setImmediate`](https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate). Unfortunately for everyone involved, `setImmediate` is only available on Edge and Node.js, meaning that this functionality must be polyfilled on all other environments. The details of this polyfill can be found in the readme of the excellent [YuzuJS/setImmediate](https://github.com/YuzuJS/setImmediate) project, though the implementation here is in terms of Scala.js primitives rather than raw JavaScript.
 
 **Unless you have some very, very specific and unusual requirements, this is the optimal `ExecutionContext` implementation for use in any ScalaJS project.** If you're using `ExecutionContext` and *not* using this project, you likely have some serious bugs and/or performance issues waiting to be discovered.
 
