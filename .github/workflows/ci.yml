@@ -108,4 +108,9 @@ jobs:
           echo "$PGP_SECRET" | base64 -d > /tmp/signing-key.gpg
           echo "$PGP_PASSPHRASE" | gpg --pinentry-mode loopback --passphrase-fd 0 --import /tmp/signing-key.gpg
 
+      - name: Strip passphrase from signing key
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+        run: echo "passwd\n$PGP_PASSPHRASE\n\n\nsave\nquit\n" | gpg --edit-key 5EBC14B0F6C55083
+
       - run: sbt ++${{ matrix.scala }} release

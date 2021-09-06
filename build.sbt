@@ -85,6 +85,11 @@ ThisBuild / githubWorkflowPublishPreamble := Seq(
       "echo \"$PGP_SECRET\" | base64 -d > /tmp/signing-key.gpg",
       "echo \"$PGP_PASSPHRASE\" | gpg --pinentry-mode loopback --passphrase-fd 0 --import /tmp/signing-key.gpg"),
     name = Some("Import signing key"),
+    env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}")),
+
+  WorkflowStep.Run(
+    List("echo \"passwd\\n$PGP_PASSPHRASE\\n\\n\\nsave\\nquit\\n\" | gpg --edit-key 5EBC14B0F6C55083"),
+    name = Some("Strip passphrase from signing key"),
     env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}")))
 
 // environments
