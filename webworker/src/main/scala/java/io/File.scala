@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.scalajs.macrotaskexecutor
+package java.io
 
-object WebworkerSuiteRunner {
-  def main(args: Array[String]): Unit = ()
+// hack hack buildinfo hack
+class File(path: String) {
+  override def toString() = path
 }

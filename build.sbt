@@ -155,5 +155,5 @@ lazy val webworker = project
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
     buildInfoKeys := Seq[BuildInfoKey](scalaVersion, baseDirectory),
-    buildInfoPackage := "org.scalajs")
+    buildInfoPackage := "org.scalajs.macrotaskexecutor")
   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)
