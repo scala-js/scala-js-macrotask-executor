@@ -17,7 +17,7 @@
 package org.scalajs.macrotaskexecutor
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 import scala.scalajs.js
 import scala.util.Random
 import scala.util.control.NonFatal
@@ -25,7 +25,7 @@ import scala.util.control.NonFatal
 /**
  * Based on https://github.com/YuzuJS/setImmediate
  */
-object MacrotaskExecutor extends ExecutionContext {
+object MacrotaskExecutor extends ExecutionContextExecutor {
   private[this] val Undefined = "undefined"
 
   def execute(runnable: Runnable): Unit =
