@@ -79,14 +79,13 @@ ThisBuild / spiewakMainBranches := Seq("main")
 ThisBuild / githubWorkflowArtifactUpload := false
 
 // we can remove this once we have a non-password-protected key in the secrets
-ThisBuild / githubWorkflowPublishPreamble :=
-  WorkflowStep.ComputeVar("GPG_TTY", "tty") +: (ThisBuild / githubWorkflowPublishPreamble).value
-
-ThisBuild / githubWorkflowPublishPreamble +=
+ThisBuild / githubWorkflowPublishPreamble := Seq(
   WorkflowStep.Run(
-    List("echo \"$PGP_PASSPHRASE\" | gpg --batch --yes --passphrase-fd 0 build.sbt &> /dev/null"),
-    name = Some("Hack pinentry to use PGP_PASSPHRASE"),
-    env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}"))
+    List(
+      "echo \"$PGP_SECRET\" | base64 -d > /tmp/signing-key.gpg",
+      "echo \"$PGP_PASSPHRASE\" | gpg --pinentry-mode loopback --passphrase-fd 0 --import /tmp/signing-key.gpg"),
+    name = Some("Import signing key"),
+    env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}")))
 
 // environments
 

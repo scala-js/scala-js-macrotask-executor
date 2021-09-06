@@ -101,15 +101,11 @@ jobs:
             ~/Library/Caches/Coursier/v1
           key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
 
-      - name: Export GPG_TTY
-        run: echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
-
       - name: Import signing key
-        run: echo $PGP_SECRET | base64 -d | gpg --import
-
-      - name: Hack pinentry to use PGP_PASSPHRASE
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-        run: echo "$PGP_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 build.sbt &> /dev/null
+        run: |
+          echo "$PGP_SECRET" | base64 -d > /tmp/signing-key.gpg
+          echo "$PGP_PASSPHRASE" | gpg --pinentry-mode loopback --passphrase-fd 0 --import /tmp/signing-key.gpg
 
       - run: sbt ++${{ matrix.scala }} release
