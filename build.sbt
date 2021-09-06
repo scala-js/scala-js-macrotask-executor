@@ -113,7 +113,7 @@ lazy val core = project
   .in(file("core"))
   .settings(
     name := "scala-js-macrotask-executor",
-    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
+    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.29" % Test,
   )
   .enablePlugins(ScalaJSPlugin)
 
@@ -126,7 +126,7 @@ lazy val webworker = project
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
       ("org.scala-js" %%% "scalajs-dom" % "1.2.0").cross(CrossVersion.for3Use2_13),
-      "org.scalameta" %% "munit" % "0.7.29" % Test,
+      "org.scalameta" %%% "munit" % "0.7.29" % Test,
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
     buildInfoKeys := Seq[BuildInfoKey](scalaVersion, baseDirectory),
