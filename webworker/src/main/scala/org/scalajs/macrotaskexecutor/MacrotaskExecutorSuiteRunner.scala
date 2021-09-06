@@ -23,7 +23,6 @@ import org.junit.runner.notification.RunNotifier
 import org.scalajs.dom.webworkers.DedicatedWorkerGlobalScope
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
 import scala.util
 
 object MacrotaskExecutorSuiteRunner {
