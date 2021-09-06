@@ -1,6 +1,6 @@
 # scala-js-macrotask-executor
 
-TODO description
+See [scala-js#4129](https://github.com/scala-js/scala-js/issues/4129) for discussion.
 
 ## Usage
 
