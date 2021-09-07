@@ -25,10 +25,19 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         scala: [2.12.14, 2.13.6, 3.0.2]
         java: [adopt@1.8]
-        ci: [ciNode, ciFirefox, ciChrome, ciJSDOMNodeJS]
+        ci: [ciNode, ciFirefox, ciChrome, ciSafari, ciJSDOMNodeJS]
+        exclude:
+          - ci: ciNode
+            os: macos-latest
+          - ci: ciFirefox
+            os: macos-latest
+          - ci: ciChrome
+            os: macos-latest
+          - ci: ciJSDOMNodeJS
+            os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)

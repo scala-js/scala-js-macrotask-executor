@@ -17,6 +17,7 @@
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.firefox.{FirefoxOptions, FirefoxProfile}
+import org.openqa.selenium.safari.{SafariOptions, SafariDriver}
 import org.openqa.selenium.remote.server.{DriverFactory, DriverProvider}
 
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
@@ -47,6 +48,10 @@ ThisBuild / scmInfo := Some(
 
 ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.6", "3.0.2")
 
+val PrimaryOS = "ubuntu-latest"
+val MacOS = "macos-latest"
+ThisBuild / githubWorkflowOSes := Seq(PrimaryOS, MacOS)
+
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
     UseRef.Public("actions", "setup-node", "v2.1.2"),
@@ -58,7 +63,10 @@ ThisBuild / githubWorkflowBuildPreamble ++= Seq(
     name = Some("Install jsdom"),
     cond = Some("matrix.ci == 'ciJSDOMNodeJS'")))
 
-val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciJSDOMNodeJS")
+val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciSafari", "ciJSDOMNodeJS")
+
+ThisBuild / githubWorkflowBuildMatrixExclusions ++= ciVariants.filter(_ != "ciSafari")
+  .map(ci => MatrixExclude(Map("ci" -> ci, "os" -> MacOS)))
 
 ThisBuild / githubWorkflowBuildMatrixAdditions += "ci" -> ciVariants
 
@@ -69,6 +77,7 @@ replaceCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
 addCommandAlias("ciNode", "; set useJSEnv := JSEnv.NodeJS; core/test; core/doc")
 addCommandAlias("ciFirefox", "; set useJSEnv := JSEnv.Firefox; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciChrome", "; set useJSEnv := JSEnv.Chrome; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciSafari", "; set useJSEnv := JSEnv.Safari; all core/test; set useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciJSDOMNodeJS", "; set useJSEnv := JSEnv.JSDOMNodeJS; core/test; set useJSEnv := JSEnv.NodeJS")
 
 // release configuration
@@ -130,6 +139,9 @@ ThisBuild / Test / jsEnv := {
           defaultFactory.registerDriverProvider(provider)
       }
       new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
+    case Safari => 
+      val options = new SafariOptions()
+      new SeleniumJSEnv(options)
   }
 }
 
