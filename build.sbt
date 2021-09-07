@@ -65,6 +65,7 @@ ThisBuild / githubWorkflowBuildPreamble ++= Seq(
 
 val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciSafari", "ciJSDOMNodeJS")
 
+ThisBuild / githubWorkflowBuildMatrixExclusions += MatrixExclude(Map("ci" -> "ciSafari", "os" -> PrimaryOS))
 ThisBuild / githubWorkflowBuildMatrixExclusions ++= ciVariants.filter(_ != "ciSafari")
   .map(ci => MatrixExclude(Map("ci" -> ci, "os" -> MacOS)))
 

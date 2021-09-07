@@ -30,6 +30,8 @@ jobs:
         java: [adopt@1.8]
         ci: [ciNode, ciFirefox, ciChrome, ciSafari, ciJSDOMNodeJS]
         exclude:
+          - ci: ciSafari
+            os: ubuntu-latest
           - ci: ciNode
             os: macos-latest
           - ci: ciFirefox
