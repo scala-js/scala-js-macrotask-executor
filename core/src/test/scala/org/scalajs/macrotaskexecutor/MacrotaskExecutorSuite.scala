@@ -32,15 +32,15 @@ class MacrotaskExecutorSuite extends FunSuite {
       else
         Future.unit.flatMap(_ => loop(n - 1)).map(_ + 1)
 
-    // val start = System.currentTimeMillis()
-    // val MinimumClamp = 10000 * 2 * 4    // HTML5 specifies a 4ms clamp (https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting)
+    val start = System.currentTimeMillis()
+    val MinimumClamp = 10000 * 2 * 4    // HTML5 specifies a 4ms clamp (https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting)
 
     loop(10000) flatMap { res =>
       Future {
-        // val end = System.currentTimeMillis()
+        val end = System.currentTimeMillis()
 
         assert(res == 10000)
-        // assert((end - start).toDouble / MinimumClamp < 0.25)   // we should beat the clamping by at least 4x even on slow environments
+        assert((end - start).toDouble / MinimumClamp < 0.25)   // we should beat the clamping by at least 4x even on slow environments
       }
     }
   }
