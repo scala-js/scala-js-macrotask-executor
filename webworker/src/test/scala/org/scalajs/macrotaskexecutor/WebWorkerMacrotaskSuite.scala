@@ -20,8 +20,6 @@ import munit.FunSuite
 import org.scalajs.dom.webworkers.Worker
 
 import scala.concurrent.Promise
-import scala.scalajs.js
-import scala.util.Try
 
 class WebWorkerMacrotaskSuite extends FunSuite {
 
