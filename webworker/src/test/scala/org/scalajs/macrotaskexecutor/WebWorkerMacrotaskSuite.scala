@@ -26,7 +26,7 @@ import scala.util.Try
 class WebWorkerMacrotaskSuite extends FunSuite {
 
   import MacrotaskExecutor.Implicits._
-  
+
   def scalaVersion = if (BuildInfo.scalaVersion.startsWith("2"))
     BuildInfo.scalaVersion.split("\\.").init.mkString(".")
   else
@@ -37,10 +37,12 @@ class WebWorkerMacrotaskSuite extends FunSuite {
   Try(js.isUndefined(js.Dynamic.global.window.Worker)).toOption
     .filterNot(identity)
     .foreach { _ =>
-      test("macrotask executor should pass the suite on a webworker") {
+      test("pass the MacrotaskSuite in a web worker") {
         val p = Promise[Boolean]()
 
-        val worker = new Worker(s"file://${targetDir}/scala-js-macrotask-executor-webworker-fastopt/main.js")
+        val worker = new Worker(
+          s"file://${targetDir}/scala-js-macrotask-executor-webworker-fastopt/main.js"
+        )
 
         worker.onmessage = { event =>
           event.data match {

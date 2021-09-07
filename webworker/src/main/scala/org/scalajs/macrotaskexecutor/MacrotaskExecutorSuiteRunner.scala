@@ -23,29 +23,53 @@ import org.junit.runner.notification.RunNotifier
 import org.scalajs.dom.webworkers.DedicatedWorkerGlobalScope
 
 import scala.scalajs.js
-import scala.util
 
 object MacrotaskExecutorSuiteRunner {
-
-  import MacrotaskExecutor.Implicits._
 
   def postMessage(msg: js.Any): Unit =
     DedicatedWorkerGlobalScope.self.postMessage(msg)
 
-  def main(args: Array[String]): Unit =
+  def main(args: Array[String]): Unit = {
     new MUnitRunner(
       classOf[MacrotaskExecutorSuite],
       () => new MacrotaskExecutorSuite
     ).runAsync(new RunNotifier {
+
+      var count = new MacrotaskExecutorSuite().munitTests().size
+      var overallSuccess = true
+      def reportTest(success: Boolean): Unit = {
+        overallSuccess &= success
+        count -= 1
+        if (count == 0) postMessage(overallSuccess)
+      }
+
       def fireTestStarted(description: Description): Unit = ()
-      def fireTestSuiteStarted(description: Description): Unit = ()
+
+      def fireTestSuiteStarted(description: Description): Unit =
+        postMessage(s"${classOf[MacrotaskExecutorSuite].getName}:")
+
+      // This doesn't account for async and fires before any tests are run!
       def fireTestSuiteFinished(description: Description): Unit = ()
+
       def fireTestIgnored(description: Description): Unit = ()
-      def fireTestFinished(description: Description): Unit = ()
-      def fireTestFailure(failure: Failure): Unit = postMessage(false)
-      def fireTestAssumptionFailed(failure: Failure): Unit = postMessage(false)
-    }).onComplete {
-      case util.Success(_) => postMessage(true)
-      case util.Failure(_) => postMessage(false)
-    }
+
+      def fireTestFinished(description: Description): Unit = {
+        postMessage(s"  + ${description.getMethodName}")
+        reportTest(success = true)
+      }
+
+      def fireTestFailure(failure: Failure): Unit = {
+        postMessage(
+          s"==> X ${classOf[MacrotaskExecutorSuite].getName}.${failure.description.getMethodName}"
+        )
+        reportTest(success = false)
+      }
+
+      def fireTestAssumptionFailed(failure: Failure): Unit =
+        reportTest(success = false)
+
+    })
+
+    ()
+  }
 }
