@@ -134,6 +134,13 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
           channel.port2.postMessage(handle)
           ()
         }
+      } else if (js.typeOf(js.Dynamic.global.Node) != Undefined) { // JSDOM sandbox
+        val setImmediate = js.Dynamic.global.Node.constructor("return setImmediate")()
+        
+        { k =>
+          setImmediate(k)
+          ()
+        }
       } else {
         // we don't try to look for process.nextTick since scalajs doesn't support old node
         // we're also not going to bother fast-pathing for IE6; just fall through
