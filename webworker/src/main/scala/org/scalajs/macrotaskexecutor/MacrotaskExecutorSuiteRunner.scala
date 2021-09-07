@@ -23,16 +23,13 @@ import org.junit.runner.notification.RunNotifier
 import org.scalajs.dom.webworkers.DedicatedWorkerGlobalScope
 
 import scala.scalajs.js
-import scala.util
 
 object MacrotaskExecutorSuiteRunner {
-
-  import MacrotaskExecutor.Implicits._
 
   def postMessage(msg: js.Any): Unit =
     DedicatedWorkerGlobalScope.self.postMessage(msg)
 
-  def main(args: Array[String]): Unit =
+  def main(args: Array[String]): Unit = {
     new MUnitRunner(
       classOf[MacrotaskExecutorSuite],
       () => new MacrotaskExecutorSuite
@@ -72,4 +69,7 @@ object MacrotaskExecutorSuiteRunner {
         reportTest(success = false)
 
     })
+
+    ()
+  }
 }
