@@ -134,8 +134,14 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
           channel.port2.postMessage(handle)
           ()
         }
-      } else if (js.typeOf(js.Dynamic.global.Node) != Undefined) { // JSDOM sandbox
-        val setImmediate = js.Dynamic.global.Node.constructor("return setImmediate")()
+      } else if (
+          js.typeOf(
+            js.Dynamic.global.navigator
+          ) != Undefined && js.Dynamic.global.navigator.userAgent
+            .asInstanceOf[js.UndefOr[String]]
+            .exists(_.contains("jsdom"))
+        ) {
+          val setImmediate = js.Dynamic.global.Node.constructor("return setImmediate")()
         
         { k =>
           setImmediate(k)
