@@ -135,14 +135,15 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
           ()
         }
       } else if (
-          js.typeOf(
-            js.Dynamic.global.navigator
-          ) != Undefined && js.Dynamic.global.navigator.userAgent
-            .asInstanceOf[js.UndefOr[String]]
-            .exists(_.contains("jsdom"))
-        ) {
-          val setImmediate = js.Dynamic.global.Node.constructor("return setImmediate")()
-        
+        js.typeOf(
+          js.Dynamic.global.navigator
+        ) != Undefined && js.Dynamic.global.navigator.userAgent
+          .asInstanceOf[js.UndefOr[String]]
+          .exists(_.contains("jsdom"))
+      ) {
+        val setImmediate =
+          js.Dynamic.global.Node.constructor("return setImmediate")()
+
         { k =>
           setImmediate(k)
           ()
