@@ -66,10 +66,10 @@ ThisBuild / githubWorkflowBuild := Seq(WorkflowStep.Sbt(List("${{ matrix.ci }}")
 
 replaceCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
 
-addCommandAlias("ciNode", "; set useJSEnv := JSEnv.NodeJS; core/test; core/doc")
-addCommandAlias("ciFirefox", "; set useJSEnv := JSEnv.Firefox; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
-addCommandAlias("ciChrome", "; set useJSEnv := JSEnv.Chrome; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
-addCommandAlias("ciJSDOMNodeJS", "; set useJSEnv := JSEnv.JSDOMNodeJS; core/test; set useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciNode", "; set useJSEnv := JSEnv.NodeJS; test; core/doc")
+addCommandAlias("ciFirefox", "; set useJSEnv := JSEnv.Firefox; test; set useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciChrome", "; set useJSEnv := JSEnv.Chrome; test; set useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciJSDOMNodeJS", "; set useJSEnv := JSEnv.JSDOMNodeJS; test; set useJSEnv := JSEnv.NodeJS")
 
 // release configuration
 
@@ -161,6 +161,6 @@ lazy val webworker = project
       "org.scalameta" %%% "munit" % MUnitVersion % Test,
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
-    buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("jsEnv" -> useJSEnv.value.toString)),
+    buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
     buildInfoPackage := "org.scalajs.macrotaskexecutor")
   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)
