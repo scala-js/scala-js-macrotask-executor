@@ -161,6 +161,6 @@ lazy val webworker = project
       "org.scalameta" %%% "munit" % MUnitVersion % Test,
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
-    buildInfoKeys := Seq[BuildInfoKey](scalaVersion, baseDirectory),
+    buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("jsEnv" -> useJSEnv.value.toString)),
     buildInfoPackage := "org.scalajs.macrotaskexecutor")
   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)

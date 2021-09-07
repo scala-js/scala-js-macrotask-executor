@@ -32,6 +32,8 @@ class WebWorkerMacrotaskSuite extends FunSuite {
 
   def targetDir = s"${BuildInfo.baseDirectory}/target/scala-${scalaVersion}"
 
+  override def munitIgnore = !Set("Firefox", "Chrome").contains(BuildInfo.jsEnv)
+
   test("pass the MacrotaskSuite in a web worker") {
     val p = Promise[Boolean]()
 
