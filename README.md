@@ -42,7 +42,7 @@ js.timers.setTimeout(100.millis) {
 loop()
 ```
 
-The `loop()` future will run forever when using the default Scala.js executor, which is written in terms of JavaScript's `Promise`. The *reason* this will run forever stems from the fact that JavaScript includes two separate work queues: the microtask and the macrotask queue. The microtask queue is used exclusively by `Promise`, while the macrotask queue is used by everything else, including UI rendering, `setTimeout`, and I/O such as XHR or Node.js things. The semantics are such that, whenever the microtask queue has work, it takes full precedence over the macrotask queue until the microtask queue is completely exhausted.
+The `loop()` future will run forever when using the default Scala.js executor, which is written in terms of JavaScript's `Promise`. The *reason* this will run forever stems from the fact that JavaScript includes two separate work queues: the [microtask and the macrotask queue](https://javascript.info/event-loop). The microtask queue is used exclusively by `Promise`, while the macrotask queue is used by everything else, including UI rendering, `setTimeout`, and I/O such as XHR or Node.js things. The semantics are such that, whenever the microtask queue has work, it takes full precedence over the macrotask queue until the microtask queue is completely exhausted.
 
 This explains why the above snippet will run forever on a `Promise`-based executor: the microtask queue is *never* empty because we're constantly adding new tasks! Thus, `setTimeout` is never able to run because the macrotask queue never receives control.
 
