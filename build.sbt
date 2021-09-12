@@ -75,11 +75,11 @@ ThisBuild / githubWorkflowBuild := Seq(WorkflowStep.Sbt(List("${{ matrix.ci }}")
 
 replaceCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
 
-addCommandAlias("ciNode", "; set useJSEnv := JSEnv.NodeJS; core/test; core/doc")
-addCommandAlias("ciFirefox", "; set useJSEnv := JSEnv.Firefox; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
-addCommandAlias("ciChrome", "; set useJSEnv := JSEnv.Chrome; all core/test webworker/test; set useJSEnv := JSEnv.NodeJS")
-addCommandAlias("ciSafari", "; set useJSEnv := JSEnv.Safari; all core/test; set useJSEnv := JSEnv.NodeJS")
-addCommandAlias("ciJSDOMNodeJS", "; set useJSEnv := JSEnv.JSDOMNodeJS; core/test; set useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciNode", "; set Global / useJSEnv := JSEnv.NodeJS; test; core/doc")
+addCommandAlias("ciFirefox", "; set Global / useJSEnv := JSEnv.Firefox; test; set Global / useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciChrome", "; set Global / useJSEnv := JSEnv.Chrome; test; set Global / useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciSafari", "; set Global / useJSEnv := JSEnv.Safari; test; set Global / useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciJSDOMNodeJS", "; set Global / useJSEnv := JSEnv.JSDOMNodeJS; test; set Global / useJSEnv := JSEnv.NodeJS")
 
 // release configuration
 
@@ -175,6 +175,6 @@ lazy val webworker = project
       "org.scalameta" %%% "munit" % MUnitVersion % Test,
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
-    buildInfoKeys := Seq[BuildInfoKey](scalaVersion, baseDirectory),
+    buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
     buildInfoPackage := "org.scalajs.macrotaskexecutor")
   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)

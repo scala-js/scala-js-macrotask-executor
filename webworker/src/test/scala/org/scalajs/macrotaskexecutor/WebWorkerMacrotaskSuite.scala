@@ -20,40 +20,37 @@ import munit.FunSuite
 import org.scalajs.dom.webworkers.Worker
 
 import scala.concurrent.Promise
-import scala.scalajs.js
-import scala.util.Try
 
 class WebWorkerMacrotaskSuite extends FunSuite {
 
   import MacrotaskExecutor.Implicits._
 
   def scalaVersion = if (BuildInfo.scalaVersion.startsWith("2"))
-    BuildInfo.scalaVersion.split("\\.").init.mkString(".")
+    BuildInfo.scalaVersion.split('.').init.mkString(".")
   else
     BuildInfo.scalaVersion
 
   def targetDir = s"${BuildInfo.baseDirectory}/target/scala-${scalaVersion}"
 
-  Try(js.isUndefined(js.Dynamic.global.window.Worker)).toOption
-    .filterNot(identity)
-    .foreach { _ =>
-      test("pass the MacrotaskSuite in a web worker") {
-        val p = Promise[Boolean]()
+  override def munitIgnore = !BuildInfo.isBrowser
 
-        val worker = new Worker(
-          s"file://${targetDir}/scala-js-macrotask-executor-webworker-fastopt/main.js"
-        )
+  test("pass the MacrotaskSuite in a web worker") {
+    val p = Promise[Boolean]()
 
-        worker.onmessage = { event =>
-          event.data match {
-            case log: String      => println(log)
-            case success: Boolean => p.success(success)
-            case _                => ()
-          }
-        }
+    val worker = new Worker(
+      s"file://${targetDir}/scala-js-macrotask-executor-webworker-fastopt/main.js"
+    )
 
-        p.future.map(assert(_))
-
+    worker.onmessage = { event =>
+      event.data match {
+        case log: String      => println(log)
+        case success: Boolean => p.success(success)
+        case _                => ()
       }
     }
+
+    p.future.map(assert(_))
+
+  }
+
 }

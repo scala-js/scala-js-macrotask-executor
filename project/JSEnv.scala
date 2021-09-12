@@ -1,8 +1,8 @@
-sealed abstract class JSEnv
+sealed abstract class JSEnv(val isBrowser: Boolean)
 object JSEnv {
-  case object Chrome extends JSEnv
-  case object Firefox extends JSEnv
-  case object Safari extends JSEnv
-  case object JSDOMNodeJS extends JSEnv
-  case object NodeJS extends JSEnv
+  case object Chrome extends JSEnv(true)
+  case object Firefox extends JSEnv(true)
+  case object JSDOMNodeJS extends JSEnv(false)
+  case object NodeJS extends JSEnv(false)
+  case object Safari extends JSEnv(false) // TODO
 }

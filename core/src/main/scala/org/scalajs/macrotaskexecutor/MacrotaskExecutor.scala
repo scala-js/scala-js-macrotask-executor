@@ -26,7 +26,7 @@ import scala.util.control.NonFatal
  * Based on https://github.com/YuzuJS/setImmediate
  */
 object MacrotaskExecutor extends ExecutionContextExecutor {
-  private[this] val Undefined = "undefined"
+  private[this] final val Undefined = "undefined"
 
   def execute(runnable: Runnable): Unit =
     setImmediate(() => runnable.run())
@@ -132,6 +132,20 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
 
           tasksByHandle += (handle -> k)
           channel.port2.postMessage(handle)
+          ()
+        }
+      } else if (
+        js.typeOf(
+          js.Dynamic.global.navigator
+        ) != Undefined && js.Dynamic.global.navigator.userAgent
+          .asInstanceOf[js.UndefOr[String]]
+          .exists(_.contains("jsdom"))
+      ) {
+        val setImmediate =
+          js.Dynamic.global.Node.constructor("return setImmediate")()
+
+        { k =>
+          setImmediate(k)
           ()
         }
       } else {
