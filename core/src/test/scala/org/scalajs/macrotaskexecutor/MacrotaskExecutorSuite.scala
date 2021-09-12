@@ -30,7 +30,7 @@ class MacrotaskExecutorSuite extends FunSuite {
       if (n <= 0)
         Future(0)
       else
-        Future.unit.flatMap(_ => loop(n - 1)).map(_ + 1)
+        Future.successful(()).flatMap(_ => loop(n - 1)).map(_ + 1)
 
     val start = System.currentTimeMillis()
     val MinimumClamp = 10000 * 2 * 4    // HTML5 specifies a 4ms clamp (https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting)
@@ -52,7 +52,7 @@ class MacrotaskExecutorSuite extends FunSuite {
     def loop(): Future[Unit] =
       Future(cancel) flatMap { canceled =>
         if (canceled)
-          Future.unit
+          Future.successful(())
         else
           loop()
       }
