@@ -113,7 +113,7 @@ lazy val safariEnv = {
   import scala.sys.process._
   Process(List("killall", "Safari")).!
   val options = new SafariOptions()
-  new SeleniumJSEnv(options)
+  new SeleniumJSEnv(options, SeleniumJSEnv.Config().withKeepAlive(true))
 }
 
 ThisBuild / Test / jsEnv := {
