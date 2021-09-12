@@ -78,7 +78,7 @@ replaceCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
 addCommandAlias("ciNode", "; set Global / useJSEnv := JSEnv.NodeJS; test; core/doc")
 addCommandAlias("ciFirefox", "; set Global / useJSEnv := JSEnv.Firefox; test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciChrome", "; set Global / useJSEnv := JSEnv.Chrome; test; set Global / useJSEnv := JSEnv.NodeJS")
-addCommandAlias("ciSafari", "; set Global / useJSEnv := JSEnv.Safari; test; set Global / useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciSafari", "; set Global / useJSEnv := JSEnv.Safari; core / test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciJSDOMNodeJS", "; set Global / useJSEnv := JSEnv.JSDOMNodeJS; test; set Global / useJSEnv := JSEnv.NodeJS")
 
 // release configuration
