@@ -17,6 +17,7 @@
 package org.scalajs.macrotaskexecutor
 
 import munit.FunSuite
+import org.scalajs.dom.MessageEvent
 import org.scalajs.dom.webworkers.Worker
 
 import scala.concurrent.Promise
@@ -41,7 +42,7 @@ class WebWorkerMacrotaskSuite extends FunSuite {
       s"file://${targetDir}/scala-js-macrotask-executor-webworker-fastopt/main.js"
     )
 
-    worker.onmessage = { event =>
+    worker.onmessage = { (event: MessageEvent) =>
       event.data match {
         case log: String      => println(log)
         case success: Boolean => p.success(success)
