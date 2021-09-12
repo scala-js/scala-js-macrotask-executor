@@ -109,11 +109,6 @@ lazy val useJSEnv =
 
 Global / useJSEnv := JSEnv.NodeJS
 
-lazy val safariEnv = {
-  val options = new SafariOptions()
-  new SeleniumJSEnv(options)
-}
-
 ThisBuild / Test / jsEnv := {
   import JSEnv._
 
@@ -146,7 +141,8 @@ ThisBuild / Test / jsEnv := {
       }
       new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
     case Safari => 
-      safariEnv
+      val options = new SafariOptions()
+      new SeleniumJSEnv(options)
   }
 }
 
