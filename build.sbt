@@ -146,6 +146,7 @@ ThisBuild / Test / jsEnv := {
   }
 }
 
+ThisBuild / Test / parallelExecution := false
 ThisBuild / Test / testOptions += Tests.Argument(MUnitFramework, "+l")
 
 // project structure
