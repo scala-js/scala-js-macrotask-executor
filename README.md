@@ -10,7 +10,7 @@ An implementation of `ExecutionContext` in terms of JavaScript's [`setImmediate`
 libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "0.2.0"
 ```
 
-Published for Scala 2.12.14, 2.13.6, 3.0.1. Functionality is fully supported on all platforms supported by Scala.js (including web workers). In the event that a given platform does *not* have the necessary functionality to implement `setImmediate`-style yielding (usually `postMessage` is what is required), the implementation will transparently fall back to using `setTimeout`, which will drastically inhibit performance but remain otherwise functional.
+Published for Scala 2.11, 2.12, 2.13, 3. Functionality is fully supported on all platforms supported by Scala.js (including web workers). In the event that a given platform does *not* have the necessary functionality to implement `setImmediate`-style yielding (usually `postMessage` is what is required), the implementation will transparently fall back to using `setTimeout`, which will drastically inhibit performance but remain otherwise functional.
 
 ```scala
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
@@ -42,7 +42,7 @@ js.timers.setTimeout(100.millis) {
 loop()
 ```
 
-The `loop()` future will run forever when using the default Scala.js executor, which is written in terms of JavaScript's `Promise`. The *reason* this will run forever stems from the fact that JavaScript includes two separate work queues: the [microtask and the macrotask queue](https://javascript.info/event-loop). The microtask queue is used exclusively by `Promise`, while the macrotask queue is used by everything else, including UI rendering, `setTimeout`, and I/O such as XHR or Node.js things. The semantics are such that, whenever the microtask queue has work, it takes full precedence over the macrotask queue until the microtask queue is completely exhausted.
+The `loop()` future will run forever when using the default Scala.js executor, which is written in terms of JavaScript's `Promise`. The *reason* this will run forever stems from the fact that JavaScript includes two separate work queues: the [microtask and the macrotask queue](https://javascript.info/event-loop). The microtask queue is used exclusively by `Promise`, while the macrotask queue is used by everything else, including UI rendering, `setTimeout`, and I/O such as Fetch or Node.js things. The semantics are such that, whenever the microtask queue has work, it takes full precedence over the macrotask queue until the microtask queue is completely exhausted.
 
 This explains why the above snippet will run forever on a `Promise`-based executor: the microtask queue is *never* empty because we're constantly adding new tasks! Thus, `setTimeout` is never able to run because the macrotask queue never receives control.
 
