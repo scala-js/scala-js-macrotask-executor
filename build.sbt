@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 val MUnitFramework = new TestFramework("munit.Framework")
 val MUnitVersion = "0.7.29"
 
-ThisBuild / baseVersion := "0.2"
+ThisBuild / baseVersion := "1.0"
 
 ThisBuild / organization := "org.scala-js"
 ThisBuild / organizationName := "Scala.js (https://www.scala-js.org/)"
