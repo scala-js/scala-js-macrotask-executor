@@ -78,7 +78,7 @@ Fortunately, we aren't the only ones to have this problem. What we *want* is som
 
 The `setImmediate` function was first introduced in Node.js, and its purpose is to solve *exactly* this problem: a faster `setTimeout(..., 0)`. In particular, `setImmediate(...)` is *semantically* equivalent to `setTimeout(0, ...)`, except without the associated clamping: it doesn't include a delay mechanism of any sort, it simply takes a callback and immediately submits it to the event loop, which in turn will run the callback as soon as its turn comes up.
 
-Unfortunately, `setImmediate` isn't available on every platform. For reasons of... their own, Mozilla, Google, and Apple have all strenuously objected to the inclusion of `setImmediate` in the W3C standard set, despite the proposal (which originated at Microsoft) and obvious usefulness. This in turn has resulted in an all-too familiar patchwork of inconsistency across the JavaScript space.
+Unfortunately, `setImmediate` isn't available on every platform. For reasons of... their own, Mozilla, Google, and Apple have all strenuously objected to the inclusion of `setImmediate` in the W3C standard set, despite the proposal (which originated at Microsoft) and obvious usefulness. This in turn has resulted in inconsistency across the JavaScript space.
 
 That's the bad news. The good news is that all modern browsers include *some* sort of functionality which can be exploited to emulate `setImmediate` with similar performance characteristics. In particular, *most* environments take advantage of `postMessage` in some way. If you're interested in the nitty-gritty details of how this works, you are referred to [this excellent readme](https://github.com/YuzuJS/setImmediate#the-tricks).
 
