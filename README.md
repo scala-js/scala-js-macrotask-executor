@@ -13,7 +13,7 @@ libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.0.0
 Published for Scala 2.11, 2.12, 2.13, 3. Functionality is fully supported on all platforms supported by Scala.js (including web workers). In the event that a given platform does *not* have the necessary functionality to implement `setImmediate`-style yielding (usually `postMessage` is what is required), the implementation will transparently fall back to using `setTimeout`, which will drastically inhibit performance but remain otherwise functional.
 
 ```scala
-import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+import org.Scala.js.macrotaskexecutor.MacrotaskExecutor.Implicits._
 ```
 
 You can also simply import `MacrotaskExecutor` if using the `ExecutionContext` directly.
@@ -44,7 +44,7 @@ loop()
 
 The `loop()` future will run forever when using the default Scala.js executor, which is written in terms of JavaScript's `Promise`. The *reason* this will run forever stems from the fact that JavaScript includes two separate work queues: the [microtask and the macrotask queue](https://javascript.info/event-loop). The microtask queue is used exclusively by `Promise`, while the macrotask queue is used by everything else, including UI rendering, `setTimeout`, and I/O such as Fetch or Node.js things. The semantics are such that, whenever the microtask queue has work, it takes full precedence over the macrotask queue until the microtask queue is completely exhausted.
 
-This explains why the above snippet will run forever on a `Promise`-based executor: the microtask queue is *never* empty because we're constantly adding new tasks! Thus, `setTimeout` is never able to run because the macrotask queue never receives control. This is horrible, even by JavaScript standards.
+This explains why the above snippet will run forever on a `Promise`-based executor: the microtask queue is *never* empty because we're constantly adding new tasks! Thus, `setTimeout` is never able to run because the macrotask queue never receives control.
 
 ### `setTimeout`
 
@@ -76,16 +76,16 @@ You can read more details [in the MDN documentation](https://developer.mozilla.o
 
 Fortunately, we aren't the only ones to have this problem. What we *want* is something which uses the macrotask queue (so we play nicely with `setTimeout`, I/O, and other macrotasks), but which doesn't have as much overhead as `setTimeout`. The answer is `setImmediate`.
 
-The `setImmediate` function was first introduced in NodeJS, and its purpose is to solve *exactly* this problem: a faster `setTimeout(..., 0)`. In particular, `setImmediate(...)` is *semantically* equivalent to `setTimeout(0, ...)`, except without the associated clamping: it doesn't include a delay mechanism of any sort, it simply takes a callback and immediately submits it to the event loop, which in turn will run the callback as soon as its turn comes up.
+The `setImmediate` function was first introduced in Node.js, and its purpose is to solve *exactly* this problem: a faster `setTimeout(..., 0)`. In particular, `setImmediate(...)` is *semantically* equivalent to `setTimeout(0, ...)`, except without the associated clamping: it doesn't include a delay mechanism of any sort, it simply takes a callback and immediately submits it to the event loop, which in turn will run the callback as soon as its turn comes up.
 
 Unfortunately, `setImmediate` isn't available on every platform. For reasons of... their own, Mozilla, Google, and Apple have all strenuously objected to the inclusion of `setImmediate` in the W3C standard set, despite the proposal (which originated at Microsoft) and obvious usefulness. This in turn has resulted in an all-too familiar patchwork of inconsistency across the JavaScript space.
 
 That's the bad news. The good news is that all modern browsers include *some* sort of functionality which can be exploited to emulate `setImmediate` with similar performance characteristics. In particular, *most* environments take advantage of `postMessage` in some way. If you're interested in the nitty-gritty details of how this works, you are referred to [this excellent readme](https://github.com/YuzuJS/setImmediate#the-tricks).
 
-scala-js-macrotask-executor implements *most* of the `setImmediate` polyfill in terms of ScalaJS, wrapped up in an `ExecutionContext` interface. The only elements of the polyfill which are *not* implemented are as follows:
+scala-js-macrotask-executor implements *most* of the `setImmediate` polyfill in terms of Scala.js, wrapped up in an `ExecutionContext` interface. The only elements of the polyfill which are *not* implemented are as follows:
 
-- `process.nextTick` is used by the JavaScript polyfill when running on NodeJS versions below 0.9. However, ScalaJS itself does not support NodeJS 0.9 or below, so there's really no point in supporting this case.
-- Similarly, older versions of IE (6 through 8, specifically) allow a particular exploitation of the `onreadystatechange` event fired when a `<script>` element is inserted into the DOM. However, ScalaJS does not support these environments *either*, and so there is no benefit to implementing this case.
+- `process.nextTick` is used by the JavaScript polyfill when running on Node.js versions below 0.9. However, Scala.js itself does not support Node.js 0.9 or below, so there's really no point in supporting this case.
+- Similarly, older versions of IE (6 through 8, specifically) allow a particular exploitation of the `onreadystatechange` event fired when a `<script>` element is inserted into the DOM. However, Scala.js does not support these environments *either*, and so there is no benefit to implementing this case.
 
 On environments where the polyfill is unsupported, `setTimeout` is still used as a final fallback.
 
@@ -93,7 +93,7 @@ On environments where the polyfill is unsupported, `setTimeout` is still used as
 
 Optimal performance is currently available in the following environments:
 
-- [NodeJS 0.9.1+](https://nodejs.org/api/timers.html#timers_setimmediate_callback_args)
+- [Node.js 0.9.1+](https://Node.js.org/api/timers.html#timers_setimmediate_callback_args)
 - [Browsers implementing `window.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#browser_compatibility), including:
   - Chrome 1+
   - Safari 4+
