@@ -68,7 +68,7 @@ setTimeout(() => {
 }, 0);
 ```
 
-Each timeout sets a new timeout, and so on and so on. This is exactly the sort of situation that we get into when chaining `Future`s, where each `map`/`flatMap`/`transform`/etc. schedules a another `Future` which, in turn will schedule another... etc. etc. This is exactly where we see clamping. In particular, the innermost `setTimeout` in this example will be clamped to 4 milliseconds (meaning there is no difference between `setTimeout(.., 0)` and `setTimeout(.., 4)`), which would slow down execution *even more*.
+Each timeout sets a new timeout, and so on and so on. This is exactly the sort of situation that we get into when chaining `Future`s, where each `map`/`flatMap`/`transform`/etc. schedules another `Future` which, in turn will schedule another... etc. etc. This is exactly where we see clamping. In particular, the innermost `setTimeout` in this example will be clamped to 4 milliseconds (meaning there is no difference between `setTimeout(.., 0)` and `setTimeout(.., 4)`), which would slow down execution *even more*.
 
 You can read more details [in the MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting).
 
