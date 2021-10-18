@@ -13,7 +13,7 @@ libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.0.0
 Published for Scala 2.11, 2.12, 2.13, 3. Functionality is fully supported on all platforms supported by Scala.js (including web workers). In the event that a given platform does *not* have the necessary functionality to implement `setImmediate`-style yielding (usually `postMessage` is what is required), the implementation will transparently fall back to using `setTimeout`, which will drastically inhibit performance but remain otherwise functional.
 
 ```scala
-import org.Scala.js.macrotaskexecutor.MacrotaskExecutor.Implicits._
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 ```
 
 You can also simply import `MacrotaskExecutor` if using the `ExecutionContext` directly.
