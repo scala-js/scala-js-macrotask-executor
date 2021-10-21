@@ -157,7 +157,7 @@ lazy val webworker = project
     name := "scala-js-macrotask-executor-webworker",
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % "1.2.0").cross(CrossVersion.for3Use2_13),
+      ("org.scala-js" %%% "scalajs-dom" % "2.0.0").cross(CrossVersion.for3Use2_13),
       "org.scalameta" %%% "munit" % MUnitVersion % Test,
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
