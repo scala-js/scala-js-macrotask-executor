@@ -20,7 +20,7 @@ import munit.MUnitRunner
 import org.junit.runner.Description
 import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunNotifier
-import org.scalajs.dom.webworkers.DedicatedWorkerGlobalScope
+import org.scalajs.dom.DedicatedWorkerGlobalScope
 
 import scala.scalajs.js
 
