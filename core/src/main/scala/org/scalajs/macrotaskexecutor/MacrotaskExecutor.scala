@@ -34,7 +34,7 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
   def reportFailure(cause: Throwable): Unit =
     cause.printStackTrace()
 
-  private[this] val setImmediate: (() => Unit) => Unit = {
+  val setImmediate: (() => Unit) => Unit = {
     if (js.typeOf(js.Dynamic.global.setImmediate) == Undefined) {
       var nextHandle = 1
       val tasksByHandle = mutable.Map[Int, () => Unit]()
