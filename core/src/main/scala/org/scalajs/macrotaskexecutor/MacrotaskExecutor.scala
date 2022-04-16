@@ -18,6 +18,7 @@ package org.scalajs.macrotaskexecutor
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
+import scala.scalajs.LinkingInfo
 import scala.scalajs.js
 import scala.util.Random
 import scala.util.control.NonFatal
@@ -151,6 +152,13 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
       } else {
         // we don't try to look for process.nextTick since scalajs doesn't support old node
         // we're also not going to bother fast-pathing for IE6; just fall through
+
+        if (LinkingInfo.developmentMode) {
+          if (js.typeOf(js.Dynamic.global.console) != Undefined && js.typeOf(js.Dynamic.global.console.warn) != Undefined)
+            js.Dynamic.global.console.warn(
+              "Unable to polyfill setImmediate() in this environment so falling back to setTimeout(); this may affect performance. " +
+                "See https://github.com/scala-js/scala-js-macrotask-executor for more information.")
+        }
 
         { k =>
           js.Dynamic.global.setTimeout(k, 0)
