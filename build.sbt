@@ -142,7 +142,7 @@ ThisBuild / Test / jsEnv := {
       new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
     case Safari => 
       val options = new SafariOptions()
-      new SeleniumJSEnv(options, SeleniumJSEnv.Config().withKeepAlive(true))
+      new SeleniumJSEnv(options, SeleniumJSEnv.Config())
   }
 }
 
