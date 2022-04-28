@@ -50,7 +50,7 @@ ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.0.2")
 
 val PrimaryOS = "ubuntu-latest"
 val MacOS = "macos-latest"
-ThisBuild / githubWorkflowOSes := Seq(PrimaryOS)
+ThisBuild / githubWorkflowOSes := Seq(PrimaryOS, MacOS)
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
@@ -63,9 +63,11 @@ ThisBuild / githubWorkflowBuildPreamble ++= Seq(
     name = Some("Install jsdom"),
     cond = Some("matrix.ci == 'ciJSDOMNodeJS'")))
 
-val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciJSDOMNodeJS")
+val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciSafari", "ciJSDOMNodeJS")
 
-ThisBuild / githubWorkflowBuildMatrixInclusions += MatrixInclude(Map.empty, Map("ci" -> "ciSafari", "os" -> MacOS))
+ThisBuild / githubWorkflowBuildMatrixExclusions += MatrixExclude(Map("ci" -> "ciSafari", "os" -> PrimaryOS))
+ThisBuild / githubWorkflowBuildMatrixExclusions ++= ciVariants.filter(_ != "ciSafari")
+  .map(ci => MatrixExclude(Map("ci" -> ci, "os" -> MacOS)))
 
 ThisBuild / githubWorkflowBuildMatrixAdditions += "ci" -> ciVariants
 
