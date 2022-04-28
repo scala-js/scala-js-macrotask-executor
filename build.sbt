@@ -52,7 +52,7 @@ val PrimaryOS = "ubuntu-latest"
 val MacOS = "macos-latest"
 ThisBuild / githubWorkflowOSes := Seq(PrimaryOS, MacOS)
 
-ThisBuild / githubWorkflowSbtCommand += " -XX:ActiveProcessorCount=1"
+ThisBuild / githubWorkflowSbtCommand += " -J-XX:ActiveProcessorCount=1"
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
