@@ -25,10 +25,21 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         scala: [2.11.12, 2.12.15, 2.13.7, 3.0.2]
         java: [temurin@11]
-        ci: [ciNode, ciFirefox, ciChrome, ciJSDOMNodeJS]
+        ci: [ciNode, ciFirefox, ciChrome, ciSafari, ciJSDOMNodeJS]
+        exclude:
+          - ci: ciSafari
+            os: ubuntu-latest
+          - ci: ciNode
+            os: macos-latest
+          - ci: ciFirefox
+            os: macos-latest
+          - ci: ciChrome
+            os: macos-latest
+          - ci: ciJSDOMNodeJS
+            os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -66,9 +77,9 @@ jobs:
         run: npm install
 
       - name: Check that workflows are up to date
-        run: sbt ++${{ matrix.scala }} githubWorkflowCheck
+        run: 'sbt -J-XX:ActiveProcessorCount=1 ++${{ matrix.scala }} githubWorkflowCheck'
 
-      - run: sbt ++${{ matrix.scala }} '${{ matrix.ci }}'
+      - run: 'sbt -J-XX:ActiveProcessorCount=1 ++${{ matrix.scala }} ''${{ matrix.ci }}'''
 
   publish:
     name: Publish Artifacts
@@ -117,4 +128,4 @@ jobs:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
         run: (echo "$PGP_PASSPHRASE"; echo; echo) | gpg --command-fd 0 --pinentry-mode loopback --change-passphrase 5EBC14B0F6C55083
 
-      - run: sbt ++${{ matrix.scala }} release
+      - run: 'sbt -J-XX:ActiveProcessorCount=1 ++${{ matrix.scala }} release'

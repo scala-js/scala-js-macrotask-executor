@@ -17,6 +17,7 @@
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.firefox.{FirefoxOptions, FirefoxProfile}
+import org.openqa.selenium.safari.{SafariOptions, SafariDriver}
 import org.openqa.selenium.remote.server.{DriverFactory, DriverProvider}
 
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
@@ -47,6 +48,12 @@ ThisBuild / scmInfo := Some(
 
 ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.0.2")
 
+val PrimaryOS = "ubuntu-latest"
+val MacOS = "macos-latest"
+ThisBuild / githubWorkflowOSes := Seq(PrimaryOS, MacOS)
+
+ThisBuild / githubWorkflowSbtCommand += " -J-XX:ActiveProcessorCount=1"
+
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
     UseRef.Public("actions", "setup-node", "v2.1.2"),
@@ -58,7 +65,11 @@ ThisBuild / githubWorkflowBuildPreamble ++= Seq(
     name = Some("Install jsdom"),
     cond = Some("matrix.ci == 'ciJSDOMNodeJS'")))
 
-val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciJSDOMNodeJS")
+val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciSafari", "ciJSDOMNodeJS")
+
+ThisBuild / githubWorkflowBuildMatrixExclusions += MatrixExclude(Map("ci" -> "ciSafari", "os" -> PrimaryOS))
+ThisBuild / githubWorkflowBuildMatrixExclusions ++= ciVariants.filter(_ != "ciSafari")
+  .map(ci => MatrixExclude(Map("ci" -> ci, "os" -> MacOS)))
 
 ThisBuild / githubWorkflowBuildMatrixAdditions += "ci" -> ciVariants
 
@@ -69,6 +80,7 @@ replaceCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
 addCommandAlias("ciNode", "; set Global / useJSEnv := JSEnv.NodeJS; test; core/doc")
 addCommandAlias("ciFirefox", "; set Global / useJSEnv := JSEnv.Firefox; test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciChrome", "; set Global / useJSEnv := JSEnv.Chrome; test; set Global / useJSEnv := JSEnv.NodeJS")
+addCommandAlias("ciSafari", "; set Global / useJSEnv := JSEnv.Safari; core / test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciJSDOMNodeJS", "; set Global / useJSEnv := JSEnv.JSDOMNodeJS; test; set Global / useJSEnv := JSEnv.NodeJS")
 
 // release configuration
@@ -99,40 +111,49 @@ lazy val useJSEnv =
 
 Global / useJSEnv := JSEnv.NodeJS
 
-ThisBuild / Test / jsEnv := {
-  import JSEnv._
+def commonSettings(disableSafari: Boolean = false) = Seq(
+  Test / jsEnv := {
+    import JSEnv._
 
-  val old = (Test / jsEnv).value
+    val old = (Test / jsEnv).value
 
-  useJSEnv.value match {
-    case NodeJS => old
-    case JSDOMNodeJS => new JSDOMNodeJSEnv()
-    case Firefox =>
-      val profile = new FirefoxProfile()
-      profile.setPreference("privacy.file_unique_origin", false)
-      val options = new FirefoxOptions()
-      options.setProfile(profile)
-      options.setHeadless(true)
-      new SeleniumJSEnv(options)
-    case Chrome =>
-      val options = new ChromeOptions()
-      options.setHeadless(true)
-      options.addArguments("--allow-file-access-from-files")
-      val factory = new DriverFactory {
-        val defaultFactory = SeleniumJSEnv.Config().driverFactory
-        def newInstance(capabilities: org.openqa.selenium.Capabilities): WebDriver = {
-          val driver = defaultFactory.newInstance(capabilities).asInstanceOf[ChromeDriver]
-          driver.manage().timeouts().pageLoadTimeout(1, TimeUnit.HOURS)
-          driver.manage().timeouts().setScriptTimeout(1, TimeUnit.HOURS)
-          driver
+    useJSEnv.value match {
+      case NodeJS => old
+      case JSDOMNodeJS => new JSDOMNodeJSEnv()
+      case Firefox =>
+        val profile = new FirefoxProfile()
+        profile.setPreference("privacy.file_unique_origin", false)
+        val options = new FirefoxOptions()
+        options.setProfile(profile)
+        options.setHeadless(true)
+        new SeleniumJSEnv(options)
+      case Chrome =>
+        val options = new ChromeOptions()
+        options.setHeadless(true)
+        options.addArguments("--allow-file-access-from-files")
+        val factory = new DriverFactory {
+          val defaultFactory = SeleniumJSEnv.Config().driverFactory
+          def newInstance(capabilities: org.openqa.selenium.Capabilities): WebDriver = {
+            val driver = defaultFactory.newInstance(capabilities).asInstanceOf[ChromeDriver]
+            driver.manage().timeouts().pageLoadTimeout(1, TimeUnit.HOURS)
+            driver.manage().timeouts().setScriptTimeout(1, TimeUnit.HOURS)
+            driver
+          }
+          def registerDriverProvider(provider: DriverProvider): Unit =
+            defaultFactory.registerDriverProvider(provider)
         }
-        def registerDriverProvider(provider: DriverProvider): Unit =
-          defaultFactory.registerDriverProvider(provider)
-      }
-      new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
+        new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
+      case Safari if !disableSafari =>
+        println("DEBUG DEBUG DEBUG DEBUG")
+        val options = new SafariOptions()
+        new SeleniumJSEnv(options, SeleniumJSEnv.Config())
+      case _ => old
+    }
   }
-}
+)
 
+ThisBuild / parallelExecution := false
+Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 ThisBuild / Test / testOptions += Tests.Argument(MUnitFramework, "+l")
 
 // project structure
@@ -147,6 +168,7 @@ lazy val core = project
     name := "scala-js-macrotask-executor",
     libraryDependencies += "org.scalameta" %%% "munit" % MUnitVersion % Test,
   )
+  .settings(commonSettings())
   .enablePlugins(ScalaJSPlugin)
 
 // this project solely exists for testing purposes
@@ -162,5 +184,7 @@ lazy val webworker = project
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
     buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
-    buildInfoPackage := "org.scalajs.macrotaskexecutor")
+    buildInfoPackage := "org.scalajs.macrotaskexecutor"
+  )
+  .settings(commonSettings(disableSafari = true)) // bugged
   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)
