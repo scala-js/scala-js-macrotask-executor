@@ -152,7 +152,7 @@ ThisBuild / Test / testOptions += Tests.Argument(MUnitFramework, "+l")
 // project structure
 
 lazy val root = project
-  .aggregate(core, webworker)
+  .aggregate(core)
   .enablePlugins(NoPublishPlugin)
 
 lazy val core = project
@@ -164,17 +164,17 @@ lazy val core = project
   .enablePlugins(ScalaJSPlugin)
 
 // this project solely exists for testing purposes
-lazy val webworker = project
-  .in(file("webworker"))
-  .dependsOn(core % "compile->test")
-  .settings(
-    name := "scala-js-macrotask-executor-webworker",
-    scalaJSUseMainModuleInitializer := true,
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.0.0",
-      "org.scalameta" %%% "munit" % MUnitVersion % Test,
-    ),
-    (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
-    buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
-    buildInfoPackage := "org.scalajs.macrotaskexecutor")
-  .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)
+// lazy val webworker = project
+//   .in(file("webworker"))
+//   .dependsOn(core % "compile->test")
+//   .settings(
+//     name := "scala-js-macrotask-executor-webworker",
+//     scalaJSUseMainModuleInitializer := true,
+//     libraryDependencies ++= Seq(
+//       "org.scala-js" %%% "scalajs-dom" % "2.0.0",
+//       "org.scalameta" %%% "munit" % MUnitVersion % Test,
+//     ),
+//     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
+//     buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
+//     buildInfoPackage := "org.scalajs.macrotaskexecutor")
+//   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)
