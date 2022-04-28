@@ -141,7 +141,8 @@ def commonSettings(disableSafari: Boolean = false) = Seq(
             defaultFactory.registerDriverProvider(provider)
         }
         new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
-      case Safari if !disableSafari => 
+      case Safari if !disableSafari =>
+        println("DEBUG DEBUG DEBUG DEBUG")
         val options = new SafariOptions()
         new SeleniumJSEnv(options, SeleniumJSEnv.Config())
       case _ => old
