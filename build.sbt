@@ -109,13 +109,6 @@ lazy val useJSEnv =
 
 Global / useJSEnv := JSEnv.NodeJS
 
-lazy val safariEnv = {
-  import scala.sys.process._
-  Process(List("killall", "Safari")).!
-  val options = new SafariOptions()
-  new SeleniumJSEnv(options, SeleniumJSEnv.Config().withKeepAlive(true))
-}
-
 ThisBuild / Test / jsEnv := {
   import JSEnv._
 
@@ -148,7 +141,8 @@ ThisBuild / Test / jsEnv := {
       }
       new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
     case Safari => 
-      safariEnv
+      val options = new SafariOptions()
+      new SeleniumJSEnv(options, SeleniumJSEnv.Config().withKeepAlive(true))
   }
 }
 
