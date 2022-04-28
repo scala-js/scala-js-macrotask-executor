@@ -109,42 +109,44 @@ lazy val useJSEnv =
 
 Global / useJSEnv := JSEnv.NodeJS
 
-ThisBuild / Test / jsEnv := {
-  import JSEnv._
+lazy val common = Seq(
+  Test / jsEnv := {
+    import JSEnv._
 
-  val old = (Test / jsEnv).value
+    val old = (Test / jsEnv).value
 
-  useJSEnv.value match {
-    case NodeJS => old
-    case JSDOMNodeJS => new JSDOMNodeJSEnv()
-    case Firefox =>
-      val profile = new FirefoxProfile()
-      profile.setPreference("privacy.file_unique_origin", false)
-      val options = new FirefoxOptions()
-      options.setProfile(profile)
-      options.setHeadless(true)
-      new SeleniumJSEnv(options)
-    case Chrome =>
-      val options = new ChromeOptions()
-      options.setHeadless(true)
-      options.addArguments("--allow-file-access-from-files")
-      val factory = new DriverFactory {
-        val defaultFactory = SeleniumJSEnv.Config().driverFactory
-        def newInstance(capabilities: org.openqa.selenium.Capabilities): WebDriver = {
-          val driver = defaultFactory.newInstance(capabilities).asInstanceOf[ChromeDriver]
-          driver.manage().timeouts().pageLoadTimeout(1, TimeUnit.HOURS)
-          driver.manage().timeouts().setScriptTimeout(1, TimeUnit.HOURS)
-          driver
+    useJSEnv.value match {
+      case NodeJS => old
+      case JSDOMNodeJS => new JSDOMNodeJSEnv()
+      case Firefox =>
+        val profile = new FirefoxProfile()
+        profile.setPreference("privacy.file_unique_origin", false)
+        val options = new FirefoxOptions()
+        options.setProfile(profile)
+        options.setHeadless(true)
+        new SeleniumJSEnv(options)
+      case Chrome =>
+        val options = new ChromeOptions()
+        options.setHeadless(true)
+        options.addArguments("--allow-file-access-from-files")
+        val factory = new DriverFactory {
+          val defaultFactory = SeleniumJSEnv.Config().driverFactory
+          def newInstance(capabilities: org.openqa.selenium.Capabilities): WebDriver = {
+            val driver = defaultFactory.newInstance(capabilities).asInstanceOf[ChromeDriver]
+            driver.manage().timeouts().pageLoadTimeout(1, TimeUnit.HOURS)
+            driver.manage().timeouts().setScriptTimeout(1, TimeUnit.HOURS)
+            driver
+          }
+          def registerDriverProvider(provider: DriverProvider): Unit =
+            defaultFactory.registerDriverProvider(provider)
         }
-        def registerDriverProvider(provider: DriverProvider): Unit =
-          defaultFactory.registerDriverProvider(provider)
-      }
-      new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
-    case Safari => 
-      val options = new SafariOptions()
-      new SeleniumJSEnv(options, SeleniumJSEnv.Config())
+        new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
+      case Safari => 
+        val options = new SafariOptions()
+        new SeleniumJSEnv(options, SeleniumJSEnv.Config())
+    }
   }
-}
+)
 
 ThisBuild / Test / parallelExecution := false
 ThisBuild / Test / testOptions += Tests.Argument(MUnitFramework, "+l")
@@ -161,6 +163,7 @@ lazy val core = project
     name := "scala-js-macrotask-executor",
     libraryDependencies += "org.scalameta" %%% "munit" % MUnitVersion % Test,
   )
+  .settings(common)
   .enablePlugins(ScalaJSPlugin)
 
 // this project solely exists for testing purposes
@@ -176,5 +179,7 @@ lazy val webworker = project
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
     buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
-    buildInfoPackage := "org.scalajs.macrotaskexecutor")
+    buildInfoPackage := "org.scalajs.macrotaskexecutor"
+  )
+  .settings(common)
   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)

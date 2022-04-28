@@ -4,5 +4,5 @@ object JSEnv {
   case object Firefox extends JSEnv(true)
   case object JSDOMNodeJS extends JSEnv(false)
   case object NodeJS extends JSEnv(false)
-  case object Safari extends JSEnv(false) // TODO
+  case object Safari extends JSEnv(true)
 }
