@@ -148,7 +148,8 @@ lazy val common = Seq(
   }
 )
 
-ThisBuild / Test / parallelExecution := false
+ThisBuild / parallelExecution := false
+Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 ThisBuild / Test / testOptions += Tests.Argument(MUnitFramework, "+l")
 
 // project structure
