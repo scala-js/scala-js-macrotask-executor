@@ -109,7 +109,7 @@ lazy val useJSEnv =
 
 Global / useJSEnv := JSEnv.NodeJS
 
-lazy val common = Seq(
+def commonSettings(disableSafari: Boolean = false) = Seq(
   Test / jsEnv := {
     import JSEnv._
 
@@ -141,9 +141,10 @@ lazy val common = Seq(
             defaultFactory.registerDriverProvider(provider)
         }
         new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
-      case Safari => 
+      case Safari if !disableSafari => 
         val options = new SafariOptions()
         new SeleniumJSEnv(options, SeleniumJSEnv.Config())
+      case _ => old
     }
   }
 )
@@ -164,7 +165,7 @@ lazy val core = project
     name := "scala-js-macrotask-executor",
     libraryDependencies += "org.scalameta" %%% "munit" % MUnitVersion % Test,
   )
-  .settings(common)
+  .settings(commonSettings())
   .enablePlugins(ScalaJSPlugin)
 
 // this project solely exists for testing purposes
@@ -182,5 +183,5 @@ lazy val webworker = project
     buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
     buildInfoPackage := "org.scalajs.macrotaskexecutor"
   )
-  .settings(common)
+  .settings(commonSettings(disableSafari = true)) // bugged
   .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)
