@@ -18,7 +18,7 @@ package org.scalajs.macrotaskexecutor
 
 import munit.FunSuite
 import org.scalajs.dom.MessageEvent
-import org.scalajs.dom.webworkers.Worker
+import org.scalajs.dom.Worker
 
 import scala.concurrent.Promise
 

@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
 val MUnitFramework = new TestFramework("munit.Framework")
 val MUnitVersion = "0.7.29"
 
-ThisBuild / baseVersion := "0.1"
+ThisBuild / baseVersion := "1.0"
 
 ThisBuild / organization := "org.scala-js"
 ThisBuild / organizationName := "Scala.js (https://www.scala-js.org/)"
@@ -46,7 +46,7 @@ ThisBuild / scmInfo := Some(
 
 // build and matrix configuration
 
-ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.14", "2.13.6", "3.0.2")
+ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.0.2")
 
 val PrimaryOS = "ubuntu-latest"
 val MacOS = "macos-latest"
@@ -177,7 +177,7 @@ lazy val webworker = project
     name := "scala-js-macrotask-executor-webworker",
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % "1.2.0").cross(CrossVersion.for3Use2_13),
+      "org.scala-js" %%% "scalajs-dom" % "2.0.0",
       "org.scalameta" %%% "munit" % MUnitVersion % Test,
     ),
     (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
