@@ -51,7 +51,7 @@ ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
     UseRef.Public("actions", "setup-node", "v3"),
     name = Some("Setup NodeJS v16 LTS"),
-    params = Map("node-version" -> "16"),
+    params = Map("node-version" -> "16", "cache" -> "npm"),
     cond = Some("matrix.ci == 'ciNode' || matrix.ci == 'ciJSDOMNodeJS'")),
   WorkflowStep.Run(
     List("npm install"),
