@@ -49,9 +49,9 @@ ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.0.2")
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
-    UseRef.Public("actions", "setup-node", "v2.1.2"),
-    name = Some("Setup NodeJS v14 LTS"),
-    params = Map("node-version" -> "14"),
+    UseRef.Public("actions", "setup-node", "v3"),
+    name = Some("Setup NodeJS v16 LTS"),
+    params = Map("node-version" -> "16"),
     cond = Some("matrix.ci == 'ciNode' || matrix.ci == 'ciJSDOMNodeJS'")),
   WorkflowStep.Run(
     List("npm install"),
