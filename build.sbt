@@ -52,11 +52,14 @@ ThisBuild / githubWorkflowBuildPreamble ++= Seq(
     UseRef.Public("actions", "setup-node", "v3"),
     name = Some("Setup NodeJS v16 LTS"),
     params = Map("node-version" -> "16", "cache" -> "npm"),
-    cond = Some("matrix.ci == 'ciNode' || matrix.ci == 'ciJSDOMNodeJS'")),
+    cond = Some("matrix.ci == 'ciNode' || matrix.ci == 'ciJSDOMNodeJS'"),
+  ),
   WorkflowStep.Run(
     List("npm install"),
     name = Some("Install jsdom"),
-    cond = Some("matrix.ci == 'ciJSDOMNodeJS'")))
+    cond = Some("matrix.ci == 'ciJSDOMNodeJS'"),
+  ),
+)
 
 val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciJSDOMNodeJS")
 
