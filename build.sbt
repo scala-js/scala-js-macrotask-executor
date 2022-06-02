@@ -49,14 +49,17 @@ ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.0.2")
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
-    UseRef.Public("actions", "setup-node", "v2.1.2"),
-    name = Some("Setup NodeJS v14 LTS"),
-    params = Map("node-version" -> "14"),
-    cond = Some("matrix.ci == 'ciNode' || matrix.ci == 'ciJSDOMNodeJS'")),
+    UseRef.Public("actions", "setup-node", "v3"),
+    name = Some("Setup NodeJS v16 LTS"),
+    params = Map("node-version" -> "16", "cache" -> "npm"),
+    cond = Some("matrix.ci == 'ciNode' || matrix.ci == 'ciJSDOMNodeJS'"),
+  ),
   WorkflowStep.Run(
     List("npm install"),
     name = Some("Install jsdom"),
-    cond = Some("matrix.ci == 'ciJSDOMNodeJS'")))
+    cond = Some("matrix.ci == 'ciJSDOMNodeJS'"),
+  ),
+)
 
 val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciJSDOMNodeJS")
 
