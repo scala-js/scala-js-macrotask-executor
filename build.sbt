@@ -24,9 +24,6 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 import java.util.concurrent.TimeUnit
 
-val MUnitFramework = new TestFramework("munit.Framework")
-val MUnitVersion = "0.7.29"
-
 ThisBuild / baseVersion := "1.0"
 
 ThisBuild / organization := "org.scala-js"
@@ -136,7 +133,7 @@ ThisBuild / Test / jsEnv := {
   }
 }
 
-ThisBuild / Test / testOptions += Tests.Argument(MUnitFramework, "+l")
+ThisBuild / testOptions += Tests.Argument(TestFrameworks.JUnit, "-a", "-s", "-v")
 
 // project structure
 
@@ -148,9 +145,8 @@ lazy val core = project
   .in(file("core"))
   .settings(
     name := "scala-js-macrotask-executor",
-    libraryDependencies += "org.scalameta" %%% "munit" % MUnitVersion % Test,
   )
-  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSPlugin, ScalaJSJUnitPlugin)
 
 // this project solely exists for testing purposes
 lazy val webworker = project
@@ -161,9 +157,21 @@ lazy val webworker = project
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "2.0.0",
-      "org.scalameta" %%% "munit" % MUnitVersion % Test,
     ),
-    (Test / test) := (Test / test).dependsOn(Compile / fastOptJS).value,
-    buildInfoKeys := Seq(scalaVersion, baseDirectory, BuildInfoKey("isBrowser" -> useJSEnv.value.isBrowser)),
-    buildInfoPackage := "org.scalajs.macrotaskexecutor")
-  .enablePlugins(ScalaJSPlugin, BuildInfoPlugin, NoPublishPlugin)
+    (Test / test) := {
+      if (useJSEnv.value.isBrowser)
+        (Test / test).dependsOn(Compile / fastOptJS).value
+      else
+        ()
+    },
+    buildInfoKeys := Seq(
+      BuildInfoKey(
+        "workerDir" -> {
+          val outputDir = (Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value
+          outputDir.getAbsolutePath()
+        }
+      )
+    ),
+    buildInfoPackage := "org.scalajs.macrotaskexecutor",
+  )
+  .enablePlugins(ScalaJSPlugin, ScalaJSJUnitPlugin, BuildInfoPlugin, NoPublishPlugin)
