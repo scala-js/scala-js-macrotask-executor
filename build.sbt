@@ -155,9 +155,6 @@ lazy val webworker = project
   .settings(
     name := "scala-js-macrotask-executor-webworker",
     scalaJSUseMainModuleInitializer := true,
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.0.0",
-    ),
     (Test / test) := {
       if (useJSEnv.value.isBrowser)
         (Test / test).dependsOn(Compile / fastOptJS).value
