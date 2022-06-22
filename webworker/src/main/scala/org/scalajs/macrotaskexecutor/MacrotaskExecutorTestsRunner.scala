@@ -16,8 +16,6 @@
 
 package org.scalajs.macrotaskexecutor
 
-import org.scalajs.dom.DedicatedWorkerGlobalScope
-
 import scala.scalajs.concurrent.QueueExecutionContext.timeouts
 import scala.scalajs.js
 
@@ -32,7 +30,7 @@ object MacrotaskExecutorTestsRunner {
       clamping <- tests.`sequence a series of 10,000 recursive executions without clamping`
       fairness <- tests.`preserve fairness with setTimeout`
       parallel <- tests.`execute a bunch of stuff in 'parallel' and ensure it all runs`
-    } yield DedicatedWorkerGlobalScope.self.postMessage(js.Dictionary(
+    } yield js.Dynamic.global.postMessage(js.Dictionary(
       "clamping" -> clamping.isSuccess,
       "fairness" -> fairness.isSuccess,
       "parallel" -> parallel.isSuccess

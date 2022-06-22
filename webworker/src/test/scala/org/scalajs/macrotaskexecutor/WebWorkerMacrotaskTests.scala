@@ -17,8 +17,6 @@
 package org.scalajs.macrotaskexecutor
 
 import org.junit.Test
-import org.scalajs.dom.MessageEvent
-import org.scalajs.dom.Worker
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -33,10 +31,11 @@ class WebWorkerMacrotaskTests {
 
   implicit val ec: ExecutionContext = timeouts()
 
-  val worker = new Worker(s"file://${BuildInfo.workerDir}/main.js")
+  val worker =
+    js.Dynamic.newInstance(js.Dynamic.global.Worker)(s"file://${BuildInfo.workerDir}/main.js")
 
   val testsResult = Promise[js.Dictionary[Boolean]]()
-  worker.onmessage = { (event: MessageEvent) =>
+  worker.onmessage = { (event: js.Dynamic) =>
     testsResult.success(event.data.asInstanceOf[js.Dictionary[Boolean]])
   }
 
