@@ -24,7 +24,7 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 import java.util.concurrent.TimeUnit
 
-ThisBuild / baseVersion := "1.0"
+ThisBuild / baseVersion := "1.1"
 
 ThisBuild / organization := "org.scala-js"
 ThisBuild / organizationName := "Scala.js (https://www.scala-js.org/)"
@@ -42,7 +42,7 @@ ThisBuild / scmInfo := Some(
 
 // build and matrix configuration
 
-ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.0.2")
+ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.1.3")
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
