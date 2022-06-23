@@ -66,7 +66,7 @@ ThisBuild / githubWorkflowBuild := Seq(WorkflowStep.Sbt(List("${{ matrix.ci }}")
 
 addCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
 
-addCommandAlias("ciNode", "; set Global / useJSEnv := JSEnv.NodeJS; test; core/doc; core/mimaReportBinaryIssues")
+addCommandAlias("ciNode", "; set Global / useJSEnv := JSEnv.NodeJS; test; core/doc; core/mimaReportBinaryIssues; headerCheckAll")
 addCommandAlias("ciFirefox", "; set Global / useJSEnv := JSEnv.Firefox; test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciChrome", "; set Global / useJSEnv := JSEnv.Chrome; test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciJSDOMNodeJS", "; set Global / useJSEnv := JSEnv.JSDOMNodeJS; test; set Global / useJSEnv := JSEnv.NodeJS")
