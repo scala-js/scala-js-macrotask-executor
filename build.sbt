@@ -28,7 +28,7 @@ ThisBuild / tlBaseVersion := "1.1"
 
 ThisBuild / organization := "org.scala-js"
 ThisBuild / organizationName := "Scala.js (https://www.scala-js.org/)"
-
+ThisBuild / startYear := Some(2021)
 ThisBuild / developers := List(
   Developer("djspiewak", "Daniel Spiewak", "@djspiewak", url("https://github.com/djspiewak")),
   Developer("armanbilge", "Arman Bilge", "@armanbilge", url("https://github.com/armanbilge")))
