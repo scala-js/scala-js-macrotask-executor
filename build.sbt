@@ -121,6 +121,7 @@ ThisBuild / testOptions += Tests.Argument(TestFrameworks.JUnit, "-a", "-s", "-v"
 // project structure
 
 lazy val root = project
+  .in(file("."))
   .aggregate(core, webworker)
   .enablePlugins(NoPublishPlugin)
 
