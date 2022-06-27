@@ -24,11 +24,11 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 import java.util.concurrent.TimeUnit
 
-ThisBuild / baseVersion := "1.1"
+ThisBuild / tlBaseVersion := "1.1"
 
 ThisBuild / organization := "org.scala-js"
 ThisBuild / organizationName := "Scala.js (https://www.scala-js.org/)"
-
+ThisBuild / startYear := Some(2021)
 ThisBuild / developers := List(
   Developer("djspiewak", "Daniel Spiewak", "@djspiewak", url("https://github.com/djspiewak")),
   Developer("armanbilge", "Arman Bilge", "@armanbilge", url("https://github.com/armanbilge")))
@@ -64,33 +64,16 @@ ThisBuild / githubWorkflowBuildMatrixAdditions += "ci" -> ciVariants
 
 ThisBuild / githubWorkflowBuild := Seq(WorkflowStep.Sbt(List("${{ matrix.ci }}")))
 
-replaceCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
+addCommandAlias("ci", ciVariants.mkString("; ", "; ", ""))
 
-addCommandAlias("ciNode", "; set Global / useJSEnv := JSEnv.NodeJS; test; core/doc")
+addCommandAlias("ciNode", "; set Global / useJSEnv := JSEnv.NodeJS; test; core/doc; core/mimaReportBinaryIssues; headerCheckAll")
 addCommandAlias("ciFirefox", "; set Global / useJSEnv := JSEnv.Firefox; test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciChrome", "; set Global / useJSEnv := JSEnv.Chrome; test; set Global / useJSEnv := JSEnv.NodeJS")
 addCommandAlias("ciJSDOMNodeJS", "; set Global / useJSEnv := JSEnv.JSDOMNodeJS; test; set Global / useJSEnv := JSEnv.NodeJS")
 
 // release configuration
 
-enablePlugins(SonatypeCiReleasePlugin)
-
-ThisBuild / spiewakMainBranches := Seq("main")
 ThisBuild / githubWorkflowArtifactUpload := false
-
-// we can remove this once we have a non-password-protected key in the secrets
-ThisBuild / githubWorkflowPublishPreamble := Seq(
-  WorkflowStep.Run(
-    List(
-      "echo \"$PGP_SECRET\" | base64 -d > /tmp/signing-key.gpg",
-      "echo \"$PGP_PASSPHRASE\" | gpg --pinentry-mode loopback --passphrase-fd 0 --import /tmp/signing-key.gpg"),
-    name = Some("Import signing key"),
-    env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}")),
-
-  WorkflowStep.Run(
-    List("(echo \"$PGP_PASSPHRASE\"; echo; echo) | gpg --command-fd 0 --pinentry-mode loopback --change-passphrase 5EBC14B0F6C55083"),
-    name = Some("Strip passphrase from signing key"),
-    env = Map("PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}")))
 
 // environments
 
