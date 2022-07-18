@@ -42,7 +42,7 @@ ThisBuild / scmInfo := Some(
 
 // build and matrix configuration
 
-ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.15", "2.13.7", "3.1.3")
+ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.16", "2.13.7", "3.1.3")
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
