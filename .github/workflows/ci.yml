@@ -78,7 +78,7 @@ jobs:
         run: npm install
 
       - name: Check that workflows are up to date
-        run: sbt '++${{ matrix.scala }}' 'project /' githubWorkflowCheck
+        run: sbt githubWorkflowCheck
 
       - run: sbt '++${{ matrix.scala }}' '${{ matrix.ci }}'
 
