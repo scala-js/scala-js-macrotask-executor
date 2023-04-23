@@ -7,7 +7,7 @@ An implementation of `ExecutionContext` in terms of JavaScript's [`setImmediate`
 ## Usage
 
 ```sbt
-libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.0.0"
+libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1"
 ```
 
 Published for Scala 2.11, 2.12, 2.13, 3. Functionality is fully supported on all platforms supported by Scala.js (including web workers). In the event that a given platform does *not* have the necessary functionality to implement `setImmediate`-style yielding (usually `postMessage` is what is required), the implementation will transparently fall back to using `setTimeout`, which will drastically inhibit performance but remain otherwise functional.
