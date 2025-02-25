@@ -46,6 +46,10 @@ ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.16", "2.13.7", "3.1.3")
 
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
   WorkflowStep.Use(
+    UseRef.Public("sbt", "setup-sbt", "v1"),
+    name = Some("Setup sbt")
+  ),
+  WorkflowStep.Use(
     UseRef.Public("actions", "setup-node", "v3"),
     name = Some("Setup NodeJS v18 LTS"),
     params = Map("node-version" -> "18", "cache" -> "npm"),
