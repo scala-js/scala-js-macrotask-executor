@@ -16,9 +16,9 @@
 
 package org.scalajs.macrotaskexecutor
 
-import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 import scala.scalajs.js
+import scala.scalajs.js.annotation._
 import scala.util.Random
 import scala.util.control.NonFatal
 
@@ -29,15 +29,23 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
   private[this] final val Undefined = "undefined"
 
   def execute(runnable: Runnable): Unit =
-    setImmediate(() => runnable.run())
+    setImmediate(runnable)
 
   def reportFailure(cause: Throwable): Unit =
     cause.printStackTrace()
 
-  private[this] val setImmediate: (() => Unit) => Unit = {
+  @js.native
+  private[this] trait TaskMap extends js.Object {
+    @JSBracketAccess
+    def apply(handle: Int): Runnable
+    @JSBracketAccess
+    def update(handle: Int, task: Runnable): Unit
+  }
+
+  private[this] val setImmediate: Runnable => Unit = {
     if (js.typeOf(js.Dynamic.global.setImmediate) == Undefined) {
       var nextHandle = 1
-      val tasksByHandle = mutable.Map[Int, () => Unit]()
+      val tasksByHandle = (new js.Object).asInstanceOf[TaskMap]
       var currentlyRunningATask = false
 
       def canUsePostMessage(): Boolean = {
@@ -63,21 +71,17 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
         }
       }
 
-      def runIfPresent(handle: Int): Unit = {
+      def runTaskForHandle(handle: Int): Unit = {
         if (currentlyRunningATask) {
-          js.Dynamic.global.setTimeout(() => runIfPresent(handle), 0)
+          js.Dynamic.global.setTimeout(() => runTaskForHandle(handle), 0)
         } else {
-          tasksByHandle.get(handle) match {
-            case Some(task) =>
-              currentlyRunningATask = true
-              try {
-                task()
-              } finally {
-                tasksByHandle -= handle
-                currentlyRunningATask = false
-              }
-
-            case None =>
+          val task = tasksByHandle(handle)
+          currentlyRunningATask = true
+          try {
+            task.run()
+          } finally {
+            js.special.delete(tasksByHandle, handle)
+            currentlyRunningATask = false
           }
         }
 
@@ -95,7 +99,7 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
           js.Dynamic.global.Node.constructor("return setImmediate")()
 
         { k =>
-          setImmediate(k)
+          setImmediate(() => k.run())
           ()
         }
       } else if (canUsePostMessage()) {
@@ -115,7 +119,7 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
               .data
               .indexOf(messagePrefix)
               .asInstanceOf[Int] == 0) {
-            runIfPresent(event.data.toString.substring(messagePrefix.length).toInt)
+            runTaskForHandle(event.data.toString.substring(messagePrefix.length).toInt)
           }
         }
 
@@ -129,7 +133,7 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
           val handle = nextHandle
           nextHandle += 1
 
-          tasksByHandle += (handle -> k)
+          tasksByHandle(handle) = k
           js.Dynamic.global.postMessage(messagePrefix + handle, "*")
           ()
         }
@@ -137,14 +141,14 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
         val channel = js.Dynamic.newInstance(js.Dynamic.global.MessageChannel)()
 
         channel.port1.onmessage = { (event: js.Dynamic) =>
-          runIfPresent(event.data.asInstanceOf[Int])
+          runTaskForHandle(event.data.asInstanceOf[Int])
         }
 
         { k =>
           val handle = nextHandle
           nextHandle += 1
 
-          tasksByHandle += (handle -> k)
+          tasksByHandle(handle) = k
           channel.port2.postMessage(handle)
           ()
         }
@@ -153,13 +157,13 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
         // we're also not going to bother fast-pathing for IE6; just fall through
 
         { k =>
-          js.Dynamic.global.setTimeout(k, 0)
+          js.Dynamic.global.setTimeout(() => k.run(), 0)
           ()
         }
       }
     } else {
       { k =>
-        js.Dynamic.global.setImmediate(k)
+        js.Dynamic.global.setImmediate(() => k.run())
         ()
       }
     }
