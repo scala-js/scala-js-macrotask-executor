@@ -29,15 +29,15 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
   private[this] final val Undefined = "undefined"
 
   def execute(runnable: Runnable): Unit =
-    setImmediate(() => runnable.run())
+    setImmediate(runnable)
 
   def reportFailure(cause: Throwable): Unit =
     cause.printStackTrace()
 
-  private[this] val setImmediate: (() => Unit) => Unit = {
+  private[this] val setImmediate: Runnable => Unit = {
     if (js.typeOf(js.Dynamic.global.setImmediate) == Undefined) {
       var nextHandle = 1
-      val tasksByHandle = mutable.Map[Int, () => Unit]()
+      val tasksByHandle = mutable.Map[Int, Runnable]()
       var currentlyRunningATask = false
 
       def canUsePostMessage(): Boolean = {
@@ -71,7 +71,7 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
             case Some(task) =>
               currentlyRunningATask = true
               try {
-                task()
+                task.run()
               } finally {
                 tasksByHandle -= handle
                 currentlyRunningATask = false
@@ -95,7 +95,7 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
           js.Dynamic.global.Node.constructor("return setImmediate")()
 
         { k =>
-          setImmediate(k)
+          setImmediate(() => k.run())
           ()
         }
       } else if (canUsePostMessage()) {
@@ -153,13 +153,13 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
         // we're also not going to bother fast-pathing for IE6; just fall through
 
         { k =>
-          js.Dynamic.global.setTimeout(k, 0)
+          js.Dynamic.global.setTimeout(() => k.run(), 0)
           ()
         }
       }
     } else {
       { k =>
-        js.Dynamic.global.setImmediate(k)
+        js.Dynamic.global.setImmediate(() => k.run())
         ()
       }
     }
