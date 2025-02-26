@@ -44,11 +44,13 @@ ThisBuild / scmInfo := Some(
 
 ThisBuild / crossScalaVersions := Seq("2.11.12", "2.12.16", "2.13.7", "3.1.3")
 
+val setupSbt = WorkflowStep.Use(
+  UseRef.Public("sbt", "setup-sbt", "v1"),
+  name = Some("Setup sbt")
+)
+
 ThisBuild / githubWorkflowBuildPreamble ++= Seq(
-  WorkflowStep.Use(
-    UseRef.Public("sbt", "setup-sbt", "v1"),
-    name = Some("Setup sbt")
-  ),
+  setupSbt,
   WorkflowStep.Use(
     UseRef.Public("actions", "setup-node", "v3"),
     name = Some("Setup NodeJS v18 LTS"),
@@ -61,6 +63,8 @@ ThisBuild / githubWorkflowBuildPreamble ++= Seq(
     cond = Some("matrix.ci == 'ciJSDOMNodeJS'"),
   ),
 )
+
+ThisBuild / githubWorkflowPublishPreamble += setupSbt
 
 val ciVariants = List("ciNode", "ciFirefox", "ciChrome", "ciJSDOMNodeJS")
 
