@@ -1,6 +1,6 @@
 {
   "private": true,
   "devDependencies": {
-    "jsdom": "^22.1.0"
+    "jsdom": "^24.0.0"
   }
 }
