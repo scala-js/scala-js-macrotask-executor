@@ -43,7 +43,30 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
   }
 
   private[this] val setImmediate: Runnable => Unit = {
-    if (js.typeOf(js.Dynamic.global.setImmediate) == Undefined) {
+    if (js.typeOf(js.Dynamic.global.setImmediate) != Undefined) {
+      { k =>
+        js.Dynamic.global.setImmediate(() => k.run())
+        ()
+      }
+    } else if (js.typeOf(js.Dynamic.global.importScripts) == Undefined
+                && js.typeOf(js.Dynamic.global.scheduler) != Undefined
+                && js.typeOf(js.Dynamic.global.scheduler.postTask) != Undefined) {
+      val scheduler = js.Dynamic.global.scheduler
+
+      { k =>
+        scheduler.postTask { () =>
+          // postTask wraps callbacks in promises (throws become rejections).
+          // setTimeout detours around this to surface errors properly.
+          try k.run()
+          catch {
+            case NonFatal(e) =>
+              js.Dynamic.global.setTimeout(() => throw e, 0)
+              ()
+          }
+        }
+        ()
+      }
+    } else {
       var nextHandle = 1
       val tasksByHandle = (new js.Object).asInstanceOf[TaskMap]
       var currentlyRunningATask = false
@@ -160,11 +183,6 @@ object MacrotaskExecutor extends ExecutionContextExecutor {
           js.Dynamic.global.setTimeout(() => k.run(), 0)
           ()
         }
-      }
-    } else {
-      { k =>
-        js.Dynamic.global.setImmediate(() => k.run())
-        ()
       }
     }
   }

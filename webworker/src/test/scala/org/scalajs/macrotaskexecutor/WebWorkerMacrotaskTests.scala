@@ -59,4 +59,8 @@ class WebWorkerMacrotaskTests {
   def `execute a bunch of stuff in 'parallel' and ensure it all runs` =
     getTestResult("parallel")
 
+  @Test
+  def `report failures as uncaught errors rather than unhandled rejections` =
+    getTestResult("uncaught")
+
 }

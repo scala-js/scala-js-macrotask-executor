@@ -18,13 +18,15 @@ package org.scalajs.macrotaskexecutor
 
 import org.junit.Test
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration._
 import scala.scalajs.js
 import scala.util.Try
 
 class MacrotaskExecutorTests {
   import MacrotaskExecutor.Implicits._
+
+  private final val Undefined = "undefined"
 
   @Test
   def `sequence a series of 10,000 recursive executions without clamping` = {
@@ -35,7 +37,8 @@ class MacrotaskExecutorTests {
         Future.successful(()).flatMap(_ => loop(n - 1)).map(_ + 1)
 
     val start = System.currentTimeMillis()
-    val MinimumClamp = 10000 * 2 * 4    // HTML5 specifies a 4ms clamp (https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting)
+    val MinimumClamp =
+      10000 * 2 * 4 // HTML5 specifies a 4ms clamp (https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout#Minimum.2F_maximum_delay_and_timeout_nesting)
 
     loop(10000) flatMap { res =>
       Future {
@@ -43,7 +46,9 @@ class MacrotaskExecutorTests {
 
         Try {
           assert(res == 10000)
-          assert((end - start).toDouble / MinimumClamp < 0.25)   // we should beat the clamping by at least 4x even on slow environments
+          assert(
+            (end - start).toDouble / MinimumClamp < 0.25
+          ) // we should beat the clamping by at least 4x even on slow environments
         }
       }
     }
@@ -67,6 +72,111 @@ class MacrotaskExecutorTests {
     }
 
     loop()
+  }
+
+  @Test
+  def `report failures as uncaught errors rather than unhandled rejections` =
+    if (!canObserveUncaughtErrors)
+      Future.successful(Try(()))
+    else
+      observingFailures {
+        MacrotaskExecutor.execute(new Runnable {
+          def run(): Unit = throw new RuntimeException("expected")
+        })
+      } map { case (uncaught, rejections) =>
+        Try {
+          assert(rejections == 0)
+          assert(uncaught == 1)
+        }
+      }
+
+  /**
+   * Skip for Selenium in main thread
+   */
+  private def canObserveUncaughtErrors: Boolean = {
+    val inDocument = js.typeOf(js.Dynamic.global.document) != Undefined
+
+    val inJsdom = js.typeOf(js.Dynamic.global.navigator) != Undefined &&
+      js.Dynamic
+        .global
+        .navigator
+        .userAgent
+        .asInstanceOf[js.UndefOr[String]]
+        .exists(_.contains("jsdom"))
+
+    !inDocument || inJsdom
+  }
+
+  private def observingFailures(body: => Unit): Future[(Int, Int)] = {
+    var uncaught = 0
+    var rejections = 0
+
+    val onNodeUncaught: js.Function1[js.Dynamic, Unit] = { (_: js.Dynamic) => uncaught += 1 }
+    val onNodeRejection: js.Function1[js.Dynamic, Unit] = { (_: js.Dynamic) => rejections += 1 }
+
+    def browserHandler(bump: () => Unit): js.Function1[js.Dynamic, Unit] = {
+      (event: js.Dynamic) =>
+        bump()
+        event.preventDefault()
+        ()
+    }
+
+    val onBrowserUncaught = browserHandler(() => uncaught += 1)
+    val onBrowserRejection = browserHandler(() => rejections += 1)
+
+    var teardown: List[() => Unit] = Nil
+
+    nodeProcess foreach { p =>
+      p.on("uncaughtException", onNodeUncaught)
+      p.on("unhandledRejection", onNodeRejection)
+
+      teardown ::= { () =>
+        p.removeListener("uncaughtException", onNodeUncaught)
+        p.removeListener("unhandledRejection", onNodeRejection)
+        ()
+      }
+    }
+
+    if (js.typeOf(js.Dynamic.global.addEventListener) != Undefined) {
+      js.Dynamic.global.addEventListener("error", onBrowserUncaught)
+      js.Dynamic.global.addEventListener("unhandledrejection", onBrowserRejection)
+
+      teardown ::= { () =>
+        js.Dynamic.global.removeEventListener("error", onBrowserUncaught)
+        js.Dynamic.global.removeEventListener("unhandledrejection", onBrowserRejection)
+        ()
+      }
+    }
+
+    body
+
+    val result = Promise[(Int, Int)]()
+
+    // both mechanisms report asynchronously, so give them a turn to fire
+    js.timers.setTimeout(100.millis) {
+      teardown.foreach(_())
+      result.success((uncaught, rejections))
+    }
+
+    result.future
+  }
+
+  private def nodeProcess: js.UndefOr[js.Dynamic] = {
+    val candidate: js.Dynamic =
+      if (js.typeOf(js.Dynamic.global.process) != Undefined)
+        js.Dynamic.global.process
+      else if (js.typeOf(js.Dynamic.global.Node) != Undefined)
+        js.Dynamic
+          .global
+          .Node
+          .constructor("return typeof process === 'undefined' ? undefined : process")()
+      else
+        js.undefined.asInstanceOf[js.Dynamic]
+
+    if (js.typeOf(candidate) != Undefined && js.typeOf(candidate.on) != Undefined)
+      candidate
+    else
+      js.undefined
   }
 
   @Test

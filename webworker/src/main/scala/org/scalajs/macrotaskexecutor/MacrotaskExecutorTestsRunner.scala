@@ -30,10 +30,12 @@ object MacrotaskExecutorTestsRunner {
       clamping <- tests.`sequence a series of 10,000 recursive executions without clamping`
       fairness <- tests.`preserve fairness with setTimeout`
       parallel <- tests.`execute a bunch of stuff in 'parallel' and ensure it all runs`
+      uncaught <- tests.`report failures as uncaught errors rather than unhandled rejections`
     } yield js.Dynamic.global.postMessage(js.Dictionary(
       "clamping" -> clamping.isSuccess,
       "fairness" -> fairness.isSuccess,
-      "parallel" -> parallel.isSuccess
+      "parallel" -> parallel.isSuccess,
+      "uncaught" -> uncaught.isSuccess
     ))
 
     ()

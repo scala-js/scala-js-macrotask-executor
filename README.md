@@ -84,6 +84,8 @@ That's the bad news. The good news is that all modern browsers include *some* so
 
 scala-js-macrotask-executor implements *most* of the `setImmediate` polyfill in terms of Scala.js, wrapped up in an `ExecutionContext` interface. The only elements of the polyfill which are *not* implemented are as follows:
 
+The executor also checks for [`scheduler.postTask`](https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/postTask), a newer browser API purpose-built for this kind of task scheduling. Where available, it is used in place of the `setImmediate` polyfill chain described below.
+
 - `process.nextTick` is used by the JavaScript polyfill when running on Node.js versions below 0.9. However, Scala.js itself does not support Node.js 0.9 or below, so there's really no point in supporting this case.
 - Similarly, older versions of IE (6 through 8, specifically) allow a particular exploitation of the `onreadystatechange` event fired when a `<script>` element is inserted into the DOM. However, Scala.js does not support these environments *either*, and so there is no benefit to implementing this case.
 
@@ -94,6 +96,7 @@ On environments where the polyfill is unsupported, `setTimeout` is still used as
 Optimal performance is currently available in the following environments:
 
 - [Node.js 0.9.1+](https://Node.js.org/api/timers.html#timers_setimmediate_callback_args)
+- [Browsers implementing `scheduler.postTask()`](https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/postTask#browser_compatibility), including Chrome 94+ and Firefox 142+
 - [Browsers implementing `window.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#browser_compatibility), including:
   - Chrome 1+
   - Safari 4+
